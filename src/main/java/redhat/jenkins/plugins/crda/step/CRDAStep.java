@@ -16,43 +16,40 @@
 
 package redhat.jenkins.plugins.crda.step;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-
-import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.workflow.steps.Step;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.json.JSONObject;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
-import hudson.Extension;
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.api.DependenciesSummary;
+import com.redhat.exhort.api.VulnerabilitiesSummary;
+import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import org.apache.commons.io.FileUtils;
+import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.workflow.steps.*;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 import redhat.jenkins.plugins.crda.action.CRDAAction;
 import redhat.jenkins.plugins.crda.task.CRDABuilder.BuilderDescriptorImpl;
 import redhat.jenkins.plugins.crda.utils.Config;
 import redhat.jenkins.plugins.crda.utils.Utils;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
+import javax.servlet.ServletException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public final class CRDAStep extends Step {
     private String file;
@@ -125,7 +122,12 @@ public final class CRDAStep extends Step {
             try {
             	EnvVars envVars = context.get(EnvVars.class);
             	jenkinsPath = envVars.get("PATH");
-			} catch (IOException | InterruptedException e) {
+                // setting system properties to pass to java-api
+                if(envVars.get("CRDA_MVN_PATH") != null ){
+                    System.setProperty("CRDA_MVN_PATH", envVars.get("CRDA_MVN_PATH"));
+                }
+
+            } catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
         }
@@ -134,90 +136,88 @@ public final class CRDAStep extends Step {
         protected String run() throws Exception {
 
             PrintStream logger = getContext().get(TaskListener.class).getLogger();
-            logger.println("----- CRDA Analysis Begins -----");
-            String crdaUuid = "";
-            
-            String filePath = step.getFile();
-            if (filePath == null) {
-            	logger.println("Filepath for the manifest file not provided. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
-            }
-            
-            
-        	crdaUuid = Utils.getCRDACredential(step.crdaKeyId);
-        	if (crdaUuid == null) {
-        		logger.println("CRDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
-        	}
-            
-            
-            if(crdaUuid.equals("")) {
-            	logger.println("CRDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
-            }
-            
-            String cliVersion = step.getCliVersion();
-            if (cliVersion == null) {
-            	cliVersion = Config.DEFAULT_CLI_VERSION;
-            	logger.println("No CRDA Cli version provided. Taking the default version " + cliVersion);                
-            }
-            else {
-            	if (!Utils.urlExists(Config.CLI_URL.replace("version", cliVersion))) {
-            		cliVersion = Config.DEFAULT_CLI_VERSION;
-            		logger.println("No such version of CRDA CLI exist. Taking default version " + cliVersion);            		
-            	}
-            	else {
-            		cliVersion = cliVersion.replace("v", "");
-            		DefaultArtifactVersion cli = new DefaultArtifactVersion(cliVersion);
-            		DefaultArtifactVersion cliDef = new DefaultArtifactVersion(Config.DEFAULT_CLI_VERSION);
-            		DefaultArtifactVersion cliCompatible = new DefaultArtifactVersion("0.2.0");
-            		if (cli.compareTo(cliCompatible) <0 ) {
-            			logger.println("The cli version provided is older than the compatible version. Will proceed with the default value " + Config.DEFAULT_CLI_VERSION);
-            			cliVersion = Config.DEFAULT_CLI_VERSION;
-            		} else if (cli.compareTo(cliCompatible) >=0 && cli.compareTo(cliDef) <0 ) {
-            			logger.println("Please consider upgrading the cli version to " + Config.DEFAULT_CLI_VERSION);
-            		}
-            		
-            	}
-            }            
-            
-            String baseDir = Utils.doInstall(cliVersion, logger);
-            if (baseDir.equals("Failed"))
-            	return Config.EXIT_FAILED;
-            logger.println("Contribution towards anonymous usage stats is set to " + step.getConsentTelemetry());
-            String cmd = Config.CLI_CMD.replace("filepath", filePath);
-            cmd = baseDir + cmd;
             logger.println("Analysis Begins");
-            Map<String, String> envs = new HashMap<>();
-            envs.put("CRDA_KEY", crdaUuid);
-            envs.put("PATH", jenkinsPath);            
-            envs.put("CONSENT_TELEMETRY", String.valueOf(step.getConsentTelemetry()));
-            String results = Utils.doExecute(cmd, logger, envs);
-            
-            
-            if (results.equals("") || results.equals("0") || ! Utils.isJSONValid(results)) {
-            	logger.println("Analysis returned no results.");
-            	return Config.EXIT_FAILED;
-            }
-            
-            logger.println("....Analysis Summary....");
-            JSONObject res = new JSONObject(results);
-            
-            Iterator<String> keys = res.keys();
-	        String key;
-	        
-	        while(keys.hasNext()) {
-	            key = keys.next();
-	            logger.println("\t" + key.replace("_", " ") + " : " + res.get(key));
-	        }
-	        
-	        logger.println("Click on the CRDA Stack Report icon to view the detailed report");
-            
+            String crdaUuid = "";
             Run run = getContext().get(Run.class);
-            run.addAction(new CRDAAction(crdaUuid, res));
-            logger.println("----- CRDA Analysis Ends -----");
-            return res.getInt("total_vulnerabilities") == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
-        }     
+            TaskListener listener = getContext().get(TaskListener.class);
+            FilePath workspace = getContext().get(FilePath.class);
+
+            crdaUuid = Utils.getCRDACredential(step.crdaKeyId);
+            if (crdaUuid == null) {
+                logger.println("RHDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
+                return Config.EXIT_FAILED;
+            }
+
+            if(crdaUuid.equals("")) {
+                logger.println("RHDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
+                return Config.EXIT_FAILED;
+            }
+
+            System.setProperty("EXHORT_SNYK_TOKEN", crdaUuid);
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
+
+            // to get build directory
+            // run.getRootDir().getPath();
+            String manifestPath = step.getFile();
+            if (manifestPath == null) {
+                logger.println("Filepath for the manifest file not provided. Please configure the build properly and retry.");
+                return Config.EXIT_FAILED;
+            }
+
+            // instantiate the Crda API implementation
+            var exhortApi = new ExhortApi();
+            // TODO: Enable for the SP.
+//            CompletableFuture<Api.MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed(manifestPath.toString());
+
+            // get a byte array future holding a html report
+            CompletableFuture<byte[]> htmlReport = exhortApi.stackAnalysisHtml(manifestPath.toString());
+
+            // get a AnalysisReport future holding a deserialized report
+            CompletableFuture<AnalysisReport> analysisReport = exhortApi.stackAnalysis(manifestPath.toString());
+//
+            try {
+
+                processReport(analysisReport.get(), listener);
+                saveHtmlReport(htmlReport.get(), listener, workspace);
+                logger.println("Click on the RHDA Stack Report icon to view the detailed report");
+                logger.println("----- RHDA Analysis Ends -----");
+                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analysis-report.html"));
+                return (analysisReport.get().getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
+//              // TODO: Enable for the SP.
+//                run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html"));
+//                return mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal().compareTo(BigDecimal.ZERO) == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            return Config.EXIT_VULNERABLE;
+        }
+
+        private void processReport(AnalysisReport report, TaskListener listener) throws ExecutionException, InterruptedException {
+            PrintStream logger = listener.getLogger();
+            DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
+            VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
+            logger.println("Summary");
+            logger.println("  Dependencies");
+            logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
+            logger.println("    Transitive dependencies: " + dependenciesSummary.getTransitive());
+            logger.println("  Vulnerabilities");
+            logger.println("    Total: " + vulnerabilitiesSummary.getTotal());
+            logger.println("    Direct: " + vulnerabilitiesSummary.getDirect());
+            logger.println("    Critical: " + vulnerabilitiesSummary.getCritical());
+            logger.println("    High: " + vulnerabilitiesSummary.getHigh());
+            logger.println("    Medium: " + vulnerabilitiesSummary.getMedium());
+            logger.println("    Low: " + vulnerabilitiesSummary.getLow());
+            logger.println("");
+        }
+
+        private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
+            PrintStream logger = listener.getLogger();
+            File file = new File(workspace + "/dependency-analysis-report.html");
+            FileUtils.writeByteArrayToFile(file, html);
+            logger.println("You can find the detailed HTML report in your workspace.");
+        }
 
         private static final long serialVersionUID = 1L;
     }
@@ -247,11 +247,6 @@ public final class CRDAStep extends Step {
         public FormValidation doCheckFile(@QueryParameter String file) throws IOException, ServletException {
           return builderDescriptor.doCheckFile(file);
         }
-        
-        @SuppressWarnings("unused")
-        public FormValidation doCheckCliVersion(@QueryParameter String cliVersion) throws IOException, ServletException {
-          return builderDescriptor.doCheckCliVersion(cliVersion);
-        }
     	
     	@Override
         public String getFunctionName() {
@@ -260,7 +255,7 @@ public final class CRDAStep extends Step {
 
         @Override
         public String getDisplayName() {
-            return "Invoke Red Hat Codeready Dependency Analysis (CRDA)";
+            return "Test Invoke Red Hat Codeready Dependency Analysis (CRDA)";
         }
 
         @Override

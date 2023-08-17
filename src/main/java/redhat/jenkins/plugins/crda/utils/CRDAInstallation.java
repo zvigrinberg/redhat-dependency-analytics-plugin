@@ -16,21 +16,11 @@
 
 package redhat.jenkins.plugins.crda.utils;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
+
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
-
-import redhat.jenkins.plugins.crda.utils.CommandExecutor;
-import redhat.jenkins.plugins.crda.utils.Config;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -142,7 +132,6 @@ public class CRDAInstallation {
 	public void extractArtifact(String destDir, String fileZip) {
 		TarGZipUnArchiver ua = new TarGZipUnArchiver(new File(fileZip));
 		ua.setDestDirectory(new File(destDir));
-		ua.enableLogging(new ConsoleLogger(ConsoleLogger.LEVEL_DISABLED, "console"));
 		ua.extract();
 	}
 	

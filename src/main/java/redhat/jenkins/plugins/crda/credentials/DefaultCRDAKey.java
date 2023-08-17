@@ -16,13 +16,13 @@
 
 package redhat.jenkins.plugins.crda.credentials;
 
-import javax.annotation.Nonnull;
-
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import hudson.Extension;
 import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nonnull;
 
 import static hudson.util.Secret.fromString;
 
@@ -49,7 +49,7 @@ public class DefaultCRDAKey extends BaseStandardCredentials implements CRDAKey{
 	  @Nonnull
 	  @Override
 	  public String getDisplayName() {
-	    return "CRDA Key";
+	    return "RHDA Key";
 	  }
 	}
 

@@ -16,17 +16,20 @@
 
 package redhat.jenkins.plugins.crda.action;
 
+import com.redhat.exhort.api.AnalysisReport;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
-import org.json.JSONObject;
-import redhat.jenkins.plugins.crda.model.Results;
 
 public class CRDAAction implements RunAction2 {
 
     private transient Run run;
     private String uuid;
-    private Results results;
+    private AnalysisReport report;
+    private String url;
 
+    public String getUrl() {
+        return url;
+    }
 
     @Override
     public void onAttached(Run<?, ?> run) {
@@ -42,17 +45,19 @@ public class CRDAAction implements RunAction2 {
         return run;
     }
 
-    public CRDAAction(String uuid, JSONObject res) {
+    public CRDAAction(String uuid, AnalysisReport report, String url) {
         this.uuid = uuid;
-        this.results = new Results(res);
+        this.report = report;
+        this.url = url;
+
     }
 
     public String getUuid() {
             return uuid;
     }
-    
-    public Results getResults() {
-        return results;
+
+    public AnalysisReport getReport() {
+        return report;
 	}
 
     @Override
@@ -62,7 +67,7 @@ public class CRDAAction implements RunAction2 {
 
     @Override
     public String getDisplayName() {
-        return "CRDA Stack Report";
+        return "RHDA Stack Report";
     }
 
     @Override

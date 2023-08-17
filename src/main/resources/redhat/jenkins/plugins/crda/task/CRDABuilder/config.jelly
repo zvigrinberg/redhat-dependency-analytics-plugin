@@ -28,11 +28,11 @@
       <c:select/>
     </f:entry>
     
-    <f:entry title="${%Cli Version}" field="cliVersion">
-      <div tooltip="CRDA CLI Version (vx.x.x). If not provided, default value will be picked">
-        <f:textbox />
-      </div>
-    </f:entry>
+<!--    <f:entry title="${%Cli Version}" field="cliVersion">-->
+<!--      <div tooltip="CRDA CLI Version (vx.x.x). If not provided, default value will be picked">-->
+<!--        <f:textbox />-->
+<!--      </div>-->
+<!--    </f:entry>-->
     
     <f:entry title="Contribute towards anonymous usage statistics" field="consentTelemetry">
 	    <div tooltip="Enable/Disable the collection of usage statistics">

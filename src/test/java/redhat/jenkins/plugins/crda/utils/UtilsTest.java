@@ -22,12 +22,6 @@ public class UtilsTest {
 		
 		String invalidJson = "abcdefgh";
 		assertFalse(Utils.isJSONValid(invalidJson));
-		
-		String validUrl = "https://github.com/fabric8-analytics/cli-tools/releases/v0.0.1";
-		assertTrue(Utils.urlExists(validUrl));
-		
-		String invalidUrl = "https://github.com/fabric8-analytics/cli-tools/releases/version";
-		assertFalse(Utils.urlExists(invalidUrl));
 	}
 
 }
