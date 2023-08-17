@@ -20,7 +20,7 @@
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <jenkins.version>2.387.3</jenkins.version>
     </properties>
-    <name>Red Hat Codeready Dependency Analysis Plugin</name>
+    <name>Red Hat Dependency Analysis Plugin</name>
     <url>https://github.com/jenkinsci/redhat-codeready-dependency-analysis-plugin/blob/master/README.md</url>
     <description>Add the ability to scan your dependencies and get an insight on the vulnerabilities, compliance, maintainability, popularity and more.</description>
 
