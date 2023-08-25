@@ -2,11 +2,11 @@
 ***
 
 # Table of Contents
-- [Introduction](#red-hat-dependency-analysis)
+- [Introduction](#red-hat-dependency-analytics)
 - [How To Use The Plugin](#how-to-use-the-plugin)
   - [Admin Steps](#admin-steps)
     - [Generate RHDA Key](#1-generate-rhda-key)
-    - [Install The Plugin](#2-install-the-redhat-codeready-dependency-analysis-jenkins-plugin)
+    - [Install The Plugin](#2-install-the-redhat-dependency-analytics-jenkins-plugin)
     - [RHDA Credentials](#3-rhda-credentials)
     - [Configuration](#4-configuration)
       - [1. Build Step](#option-i--as-a-build-step)
@@ -20,7 +20,7 @@
   - [2. Via CLI](#2-via-cli)
   - 
 # Red Hat Dependency Analytics
-Red Hat dependency analysis is a jenkins plugin developed by **Red Hat Inc**. RHDA (red hat dependency analytics) is powered by **Snyk Intel Vulnerability DB**, which is the most advanced and accurate open source vulnerability database in the industry. It adds value with the latest, fastest and more number of vulnerabilities derived from numerous sources.
+Red Hat dependency analytics is a jenkins plugin developed by **Red Hat Inc**. RHDA (red hat dependency analytics) is powered by **Snyk Intel Vulnerability DB**, which is the most advanced and accurate open source vulnerability database in the industry. It adds value with the latest, fastest and more number of vulnerabilities derived from numerous sources.
 
 'RHDA Report' with Insights about your application dependencies:
 - Flags a security vulnerability(CVE) and suggests a remedial version
@@ -36,9 +36,9 @@ The plugin can be used in jenkins as a pipeline task or as a build step.
 - Download the RHDA CLI tool on your system. Click [here](https://github.com/fabric8-analytics/cli-tools/releases "here") to download.
 - Follow the instructions for the installation and run `crda auth` command to generate the rhda key. Copy this key.
 
-### 2. Install the redhat-codeready-dependency-analysis jenkins plugin
+### 2. Install the redhat-dependency-analytics jenkins plugin
 - Goto the jenkins dashboard -> Manage Jenkins -> Manage Plugins.
-- Seach for `redhat-codeready-dependency-analysis` and install.
+- Seach for `redhat-dependency-analytics` and install.
 
 ### 3. RHDA credentials
 - Goto jenkins dashboard -> Manage Jenkins -> Manage Credentials. Select the global domain -> Add Credentials.
@@ -58,7 +58,7 @@ There is a way to set a custom Maven path using <em>Environment Variables</em>.
 - Set Name: EXHORT_MVN_PATH and Value: /path/to/custom/mvn.
 
 #### Option I- As a build step
-- Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Codeready Dependency Analysis (RHDA)`.
+- Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
 - Filepath (Mandatory): Provide the filepath for the manifest file. We currently support the following
 	- Maven: pom.xml
 	- Python: requirements.txt
@@ -70,7 +70,7 @@ There is a way to set a custom Maven path using <em>Environment Variables</em>.
   
 #### Option II- As a pipeline task
 - Its just a single line that you need to add in your pipeline script.
-`crdaAnalysis file:'manifest file path', crdaKeyId:'crda key id', consentTelemetry:true`
+`rhdaAnalysis file:'manifest file path', rhdaKeyId:'rhda key id', consentTelemetry:true`
 The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
 ![Screenshot from 2021-05-06 15-11-38](https://user-images.githubusercontent.com/37098367/117278019-0355d080-ae7e-11eb-9eb1-92f7b6dd256e.png)

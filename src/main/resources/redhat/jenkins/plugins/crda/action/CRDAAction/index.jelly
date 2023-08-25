@@ -95,7 +95,7 @@
 					const pathArray = currentUrl.split("/");
 					var splitLoc = currentUrl.indexOf(pathArray[pathArray.length-3]);
 					var baseUrl = currentUrl.substring(0, splitLoc);
-					return baseUrl + "ws/dependency-analysis-report.html";
+					return baseUrl + "ws/dependency-analytics-report.html";
                 }
             </script>
         </l:main-panel>
