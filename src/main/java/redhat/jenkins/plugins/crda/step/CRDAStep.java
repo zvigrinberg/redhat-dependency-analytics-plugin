@@ -181,7 +181,7 @@ public final class CRDAStep extends Step {
                 saveHtmlReport(htmlReport.get(), listener, workspace);
                 logger.println("Click on the RHDA Stack Report icon to view the detailed report");
                 logger.println("----- RHDA Analysis Ends -----");
-                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analysis-report.html"));
+                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analytics-report.html"));
                 return (analysisReport.get().getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
 //              // TODO: Enable for the SP.
 //                run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html"));
@@ -214,7 +214,7 @@ public final class CRDAStep extends Step {
 
         private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
             PrintStream logger = listener.getLogger();
-            File file = new File(workspace + "/dependency-analysis-report.html");
+            File file = new File(workspace + "/dependency-analytics-report.html");
             FileUtils.writeByteArrayToFile(file, html);
             logger.println("You can find the detailed HTML report in your workspace.");
         }

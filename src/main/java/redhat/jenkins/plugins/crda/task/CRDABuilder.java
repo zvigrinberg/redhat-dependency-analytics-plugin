@@ -240,7 +240,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
 
     private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
-        File file = new File(workspace + "/dependency-analysis-report.html");
+        File file = new File(workspace + "/dependency-analytics-report.html");
         FileUtils.writeByteArrayToFile(file, html);
         logger.println("You can find the detailed HTML report in your workspace.");
     }
