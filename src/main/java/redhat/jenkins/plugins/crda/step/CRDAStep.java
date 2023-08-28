@@ -255,7 +255,7 @@ public final class CRDAStep extends Step {
 
         @Override
         public String getDisplayName() {
-            return "Test Invoke Red Hat Codeready Dependency Analysis (CRDA)";
+            return "Test Invoke Red Hat Dependency Analytics (RHDA)";
         }
 
         @Override

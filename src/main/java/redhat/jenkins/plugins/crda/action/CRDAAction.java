@@ -62,7 +62,7 @@ public class CRDAAction implements RunAction2 {
 
     @Override
     public String getIconFileName() {
-        return "/plugin/redhat-codeready-dependency-analysis/icons/redhat.png";
+        return "/plugin/redhat-dependency-analytics/icons/redhat.png";
     }
 
     @Override

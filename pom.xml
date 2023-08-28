@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.64</version>
+        <version>4.71</version>
     </parent>
 
     <groupId>redhat.jenkins.plugins</groupId>
-    <artifactId>redhat-codeready-dependency-analysis</artifactId>
+    <artifactId>redhat-dependency-analytics</artifactId>
     <version>0.1.4-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <properties>
@@ -21,7 +21,7 @@
         <jenkins.version>2.387.3</jenkins.version>
     </properties>
     <name>Red Hat Dependency Analytics Plugin</name>
-    <url>https://github.com/jenkinsci/redhat-codeready-dependency-analysis-plugin/blob/master/README.md</url>
+    <url>https://github.com/jenkinsci/redhat-dependency-analytics-plugin/blob/master/README.md</url>
     <description>Add the ability to scan your dependencies and get an insight on the vulnerabilities, compliance, maintainability, popularity and more.</description>
 
     <dependencyManagement>
