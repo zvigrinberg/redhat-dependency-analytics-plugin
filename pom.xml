@@ -8,7 +8,7 @@
         <version>4.71</version>
     </parent>
 
-    <groupId>redhat.jenkins.plugins</groupId>
+    <groupId>io.jenkins.plugins</groupId>
     <artifactId>redhat-dependency-analytics</artifactId>
     <version>0.1.4-SNAPSHOT</version>
     <packaging>hpi</packaging>
