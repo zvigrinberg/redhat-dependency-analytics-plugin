@@ -16,7 +16,7 @@
   - [2. RHDA Stack Report](#2-rhda-stack-report)
   - [3. Detailed RHDA Stack Report](#3-detailed-rhda-stack-report)
 - [Snyk Registration](#snyk-registration)
-  - [1. Via SNYK website](#1-via-rhda-stack-report-ui)
+  - [1. Via SNYK website](#1-via-snyk-website)
   - [2. Via CLI](#2-via-cli)
   - 
 # Red Hat Dependency Analytics
