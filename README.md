@@ -70,7 +70,7 @@ There is a way to set a custom Maven path using <em>Environment Variables</em>.
   
 #### Option II- As a pipeline task
 - Its just a single line that you need to add in your pipeline script.
-`rhdaAnalysis file:'manifest file path', rhdaKeyId:'rhda key id', consentTelemetry:true`
+`crdaAnalysis file:'manifest file path', crdaKeyId:'rhda key id', consentTelemetry:true`
 The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
 ![Screenshot from 2021-05-06 15-11-38](https://user-images.githubusercontent.com/37098367/117278019-0355d080-ae7e-11eb-9eb1-92f7b6dd256e.png)
