@@ -15,8 +15,7 @@
     <properties>
         <revision>0.1.0</revision>
         <changelist>-SNAPSHOT</changelist>
-        <java.level>17</java.level>
-        <maven.compiler.release>17</maven.compiler.release>
+        <java.level>11</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <jenkins.version>2.387.3</jenkins.version>
     </properties>
