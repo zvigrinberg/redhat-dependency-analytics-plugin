@@ -56,8 +56,13 @@ Make sure that the Path is updated to point to the corresponding executables, li
 <h5>Customization</h5>
 <p>
 There is a way to set a custom Maven path using <em>Environment Variables</em>. 
-- Click on Manage Jenkins -> System. Scroll down to Global properties/Environment Variables.
-- Set Name: EXHORT_MVN_PATH and Value: /path/to/custom/mvn.
+
+- Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
+- Set Name: _EXHORT_MVN_PATH_ and Value: `/path/to/custom/mvn`.
+
+If you have a Snyk token, add that as an environment variable:
+- Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
+- Set the variable name to _EXHORT_SNYK_TOKEN_, and copy-and-paste your Snyk token into the value field.
 
 #### Option I- As a build step
 - Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
