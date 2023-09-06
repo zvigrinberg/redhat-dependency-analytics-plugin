@@ -41,9 +41,8 @@
             <version>4.0.0-alpha-4</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-lang3-api</artifactId>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
@@ -60,37 +59,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>2.0.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>2.0.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <version>2.0.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4-rule</artifactId>
-            <version>2.0.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.18.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -108,11 +81,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220320</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>2.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -160,6 +128,13 @@
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-core</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
