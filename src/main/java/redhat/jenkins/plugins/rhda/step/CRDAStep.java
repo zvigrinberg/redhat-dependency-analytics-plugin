@@ -135,13 +135,23 @@ public final class CRDAStep extends Step {
                 if(envVars.get("EXHORT_MVN_PATH") != null ){
                     System.setProperty("EXHORT_MVN_PATH", envVars.get("EXHORT_MVN_PATH"));
                 }
+                else{
+                    System.clearProperty("EXHORT_MVN_PATH");
+                }
+
                 if(envVars.get("EXHORT_URL") != null ){
                     System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
                 }
+                else{
+                    System.clearProperty("EXHORT_URL");
+                }
+
                 if(envVars.get("EXHORT_SNYK_TOKEN") != null ){
                     System.setProperty("EXHORT_SNYK_TOKEN", envVars.get("EXHORT_SNYK_TOKEN"));
                 }
-
+                else {
+                    System.clearProperty("EXHORT_SNYK_TOKEN");
+                }
             } catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
