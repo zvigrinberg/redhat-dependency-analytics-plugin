@@ -16,6 +16,7 @@
 
 package redhat.jenkins.plugins.rhda.step;
 
+import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.DependenciesSummary;
 import com.redhat.exhort.api.VulnerabilitiesSummary;
@@ -186,10 +187,8 @@ public final class CRDAStep extends Step {
 //            logger.println("workspace: " + workspace);
 //            logger.println("Build Dir: " +run.getRootDir().getPath());
 //            logger.println("reportLocation = " + workspace +"/"+ getContext().get(EnvVars.class).get("BUILD_NUMBER") + "/execution/node/3/ws/");
-//            logger.println("Job = " + run.getParent());
-//            logger.println("Job String = " + run.getParent().getName());
 
-            // Get the Jenkins job by name
+            // Get the job by name
 //            AbstractItem job = (AbstractItem) jenkins.model.Jenkins.getInstanceOrNull().getItem(run.getParent().getName());
 //            if (job != null) {
 //                String jobClassName = job.getClass().getName();
@@ -207,30 +206,19 @@ public final class CRDAStep extends Step {
 
             // instantiate the Crda API implementation
             var exhortApi = new ExhortApi();
-            // TODO: Enable for the SP.
-//            CompletableFuture<Api.MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed(manifestPath.toString());
+            CompletableFuture<Api.MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed(manifestPath.toString());
 
-            // get a byte array future holding a html report
-            CompletableFuture<byte[]> htmlReport = exhortApi.stackAnalysisHtml(manifestPath.toString());
-
-            // get a AnalysisReport future holding a deserialized report
-            CompletableFuture<AnalysisReport> analysisReport = exhortApi.stackAnalysis(manifestPath.toString());
-//
             try {
-
-                processReport(analysisReport.get(), listener);
-                saveHtmlReport(htmlReport.get(), listener, workspace);
+                processReport(mixedStackReport.get().json, listener);
+                saveHtmlReport(mixedStackReport.get().html, listener, workspace);
                 // Archiving the report
                 ArtifactArchiver archiver = new ArtifactArchiver("dependency-analytics-report.html");
                 archiver.perform(run, workspace, getContext().get(EnvVars.class), getContext().get(Launcher.class), listener);
 
                 logger.println("Click on the RHDA Stack Report icon to view the detailed report");
                 logger.println("----- RHDA Analysis Ends -----");
-                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analytics-report.html", "pipeline"));
-                return (analysisReport.get().getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
-//              // TODO: Enable for the SP.
-//                run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html"));
-//                return mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal().compareTo(BigDecimal.ZERO) == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
+                run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "pipeline"));
+                return (mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -261,8 +249,7 @@ public final class CRDAStep extends Step {
             PrintStream logger = listener.getLogger();
             File file = new File(workspace + "/dependency-analytics-report.html");
             FileUtils.writeByteArrayToFile(file, html);
-            logger.println("You can find the detailed HTML report in your workspace.");
-            logger.println("File path: " + file.getAbsolutePath());
+            logger.println("You can find the detailed HTML report in your workspace and in your build under Build Artifacts.");
         }
 
         private static final long serialVersionUID = 1L;

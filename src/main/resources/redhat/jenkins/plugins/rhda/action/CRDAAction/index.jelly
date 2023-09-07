@@ -96,7 +96,6 @@
 					var splitLoc = currentUrl.indexOf(pathArray[pathArray.length-3]);
 					var baseUrl = currentUrl.substring(0, splitLoc);
 					var url = `${it.jobtype}`
-					alert(url)
 					if (url === "pipeline") {
 						return baseUrl + "lastSuccessfulBuild/artifact/dependency-analytics-report.html";
 					}

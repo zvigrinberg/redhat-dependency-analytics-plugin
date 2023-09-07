@@ -18,6 +18,7 @@ package redhat.jenkins.plugins.rhda.task;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.DependenciesSummary;
 import com.redhat.exhort.api.VulnerabilitiesSummary;
@@ -31,6 +32,7 @@ import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
+import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -109,11 +111,22 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             if(envVars.get("EXHORT_MVN_PATH") != null ){
                 System.setProperty("EXHORT_MVN_PATH", envVars.get("EXHORT_MVN_PATH"));
             }
+            else{
+                System.clearProperty("EXHORT_MVN_PATH");
+            }
+
             if(envVars.get("EXHORT_URL") != null ){
                 System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
             }
+            else{
+                System.clearProperty("EXHORT_URL");
+            }
+
             if(envVars.get("EXHORT_SNYK_TOKEN") != null ){
                 System.setProperty("EXHORT_SNYK_TOKEN", envVars.get("EXHORT_SNYK_TOKEN"));
+            }
+            else {
+                System.clearProperty("EXHORT_SNYK_TOKEN");
             }
         }
 
@@ -130,24 +143,17 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         // get a AnalysisReport future holding a mixed report object aggregating:
         // - (json) deserialized Stack Analysis report
         // - (html) html Stack Analysis report
-        // TODO: Enable for the SP.
-//        CompletableFuture<Api.MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed(manifestPath.toString());
+        CompletableFuture<Api.MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed(manifestPath.toString());
 
-        // get a byte array future holding a html report
-        CompletableFuture<byte[]> htmlReport = exhortApi.stackAnalysisHtml(manifestPath.toString());
-
-        // get a AnalysisReport future holding a deserialized report
-        CompletableFuture<AnalysisReport> analysisReport = exhortApi.stackAnalysis(manifestPath.toString());
         try {
-            processReport(analysisReport.get(), listener);
-            saveHtmlReport(htmlReport.get(), listener, workspace);
-            // TODO: Enable for the SP.
-//            processReport(mixedStackReport.get().json, listener);
-//            saveHtmlReport(mixedStackReport.get().html, listener, workspace);
+            processReport(mixedStackReport.get().json, listener);
+            saveHtmlReport(mixedStackReport.get().html, listener, workspace);
+            // Archiving the report
+            ArtifactArchiver archiver = new ArtifactArchiver("dependency-analytics-report.html");
+            archiver.perform(run, workspace, envVars, launcher, listener);
             logger.println("Click on the RHDA Stack Report icon to view the detailed report");
             logger.println("----- RHDA Analysis Ends -----");
-            // Change analysisReport.get() to mixedStackReport.get().json for SP
-            run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analysis-report.html", "freestyle"));
+            run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "freestyle"));
         } catch (ExecutionException e) {
             logger.println("error");
             e.printStackTrace(logger);
@@ -242,7 +248,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         PrintStream logger = listener.getLogger();
         File file = new File(workspace + "/dependency-analytics-report.html");
         FileUtils.writeByteArrayToFile(file, html);
-        logger.println("You can find the detailed HTML report in your workspace.");
+        logger.println("You can find the detailed HTML report in your workspace and in your build under Build Artifacts.");
     }
 
 }
