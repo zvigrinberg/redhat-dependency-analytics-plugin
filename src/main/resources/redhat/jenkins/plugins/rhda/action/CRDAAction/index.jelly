@@ -93,7 +93,7 @@
                 function generateURL(){
 					var currentUrl = window.location.pathname;
 					const pathArray = currentUrl.split("/");
-					var splitLoc = currentUrl.indexOf(pathArray[pathArray.length-3]);
+					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length-3] + "/") + 1;
 					var baseUrl = currentUrl.substring(0, splitLoc);
 					var url = `${it.jobtype}`
 					if (url === "pipeline") {
