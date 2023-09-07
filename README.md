@@ -76,10 +76,11 @@ If you have a Snyk token, add that as an environment variable:
 ![](./images/configOption1.png)
 
   **NOTE:** If you get a Java runtime error because the build can not find the `mvn` binary, try doing the following steps:
-  1. From the Jenkins Dashboard, click **Manage Jenkins** -> **System** -> **Check Environment Variables**, click **Add**.
-  2. Enter _EXHORT_MVN_PATH_ as the variable name, with the value pointing to the `mvn` binary from the Maven Integration installation.
-     For example, a value of `$JENKINS_HOME/tools/hudson.tasks.Maven_MavenInstallation/MAVEN/bin/mvn`.
-  3. Include **Invoke top-level maven targets** as a build step by specifying the Maven version, and add **clean install** as a goal for the new pipeline item.
+  1. From the Jenkins Dashboard, click **Manage Jenkins** -> **Tools** -> **Maven Installations** -> click **Add Maven** -> Enter a name on **Maven Name** -> check **Install automatically** -> click **Save**
+  2. From the Jenkins Dashboard, click **Manage Jenkins** -> **System** -> **Check Environment Variables**, click **Add**.
+  3. Enter _EXHORT_MVN_PATH_ as the variable name, with the value pointing to the `mvn` binary from the Maven Integration installation.
+     For example, a value of `$JENKINS_HOME/tools/hudson.tasks.Maven_MavenInstallation/<Maven Name from Step 1>/bin/mvn`.
+  4. Include **Invoke top-level maven targets** as a build step by specifying the Maven version, and add **clean install** as a goal for the new pipeline item.
   
 #### Option II- As a pipeline task
 - Its just a single line that you need to add in your pipeline script.
