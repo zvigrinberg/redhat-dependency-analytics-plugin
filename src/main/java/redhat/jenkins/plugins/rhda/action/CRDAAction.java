@@ -27,6 +27,12 @@ public class CRDAAction implements RunAction2 {
     private AnalysisReport report;
     private String url;
 
+    public String getJobtype() {
+        return jobtype;
+    }
+
+    private String jobtype;
+
     public String getUrl() {
         return url;
     }
@@ -45,10 +51,11 @@ public class CRDAAction implements RunAction2 {
         return run;
     }
 
-    public CRDAAction(String uuid, AnalysisReport report, String url) {
+    public CRDAAction(String uuid, AnalysisReport report, String url, String jobtype) {
         this.uuid = uuid;
         this.report = report;
         this.url = url;
+        this.jobtype = jobtype;
 
     }
 

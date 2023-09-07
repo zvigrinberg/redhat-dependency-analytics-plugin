@@ -147,7 +147,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             logger.println("Click on the RHDA Stack Report icon to view the detailed report");
             logger.println("----- RHDA Analysis Ends -----");
             // Change analysisReport.get() to mixedStackReport.get().json for SP
-            run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analysis-report.html"));
+            run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analysis-report.html", "freestyle"));
         } catch (ExecutionException e) {
             logger.println("error");
             e.printStackTrace(logger);

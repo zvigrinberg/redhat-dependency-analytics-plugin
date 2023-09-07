@@ -23,13 +23,18 @@ import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.Item;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.Launcher;
+import hudson.model.*;
+import hudson.tasks.ArtifactArchiver;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.ArtifactManager;
+import jenkins.model.ArtifactManagerFactory;
+import jenkins.util.BuildListenerAdapter;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,6 +49,8 @@ import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,9 +129,16 @@ public final class CRDAStep extends Step {
             try {
             	EnvVars envVars = context.get(EnvVars.class);
             	jenkinsPath = envVars.get("PATH");
+
                 // setting system properties to pass to java-api
-                if(envVars.get("CRDA_MVN_PATH") != null ){
-                    System.setProperty("CRDA_MVN_PATH", envVars.get("CRDA_MVN_PATH"));
+                if(envVars.get("EXHORT_MVN_PATH") != null ){
+                    System.setProperty("EXHORT_MVN_PATH", envVars.get("EXHORT_MVN_PATH"));
+                }
+                if(envVars.get("EXHORT_URL") != null ){
+                    System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
+                }
+                if(envVars.get("EXHORT_SNYK_TOKEN") != null ){
+                    System.setProperty("EXHORT_SNYK_TOKEN", envVars.get("EXHORT_SNYK_TOKEN"));
                 }
 
             } catch (IOException | InterruptedException e) {
@@ -136,7 +150,7 @@ public final class CRDAStep extends Step {
         protected String run() throws Exception {
 
             PrintStream logger = getContext().get(TaskListener.class).getLogger();
-            logger.println("Analysis Begins");
+            logger.println("Red Hat Dependency Analytics Begin");
             String crdaUuid = "";
             Run run = getContext().get(Run.class);
             TaskListener listener = getContext().get(TaskListener.class);
@@ -153,16 +167,43 @@ public final class CRDAStep extends Step {
                 return Config.EXIT_FAILED;
             }
 
-            System.setProperty("EXHORT_SNYK_TOKEN", crdaUuid);
             System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
 
             // to get build directory
             // run.getRootDir().getPath();
-            String manifestPath = step.getFile();
-            if (manifestPath == null) {
-                logger.println("Filepath for the manifest file not provided. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
+//            String manifestPath = step.getFile();
+//            if (manifestPath == null) {
+//                logger.println("Filepath for the manifest file not provided. Please configure the build properly and retry.");
+//                return Config.EXIT_FAILED;
+//            }
+
+            Path manifestPath = Paths.get(step.getFile());
+            if (manifestPath.getParent() == null) {
+                manifestPath = Paths.get(workspace.child(step.getFile()).toURI());
             }
+
+//            logger.println("manifestPath: " + manifestPath);
+//            logger.println("workspace: " + workspace);
+//            logger.println("Build Dir: " +run.getRootDir().getPath());
+//            logger.println("reportLocation = " + workspace +"/"+ getContext().get(EnvVars.class).get("BUILD_NUMBER") + "/execution/node/3/ws/");
+//            logger.println("Job = " + run.getParent());
+//            logger.println("Job String = " + run.getParent().getName());
+
+            // Get the Jenkins job by name
+//            AbstractItem job = (AbstractItem) jenkins.model.Jenkins.getInstanceOrNull().getItem(run.getParent().getName());
+//            if (job != null) {
+//                String jobClassName = job.getClass().getName();
+//                logger.println("jobClassName = " + jobClassName);
+//                if (jobClassName.equals("org.jenkinsci.plugins.workflow.job.WorkflowJob")) {
+//                    logger.println("The job is a Pipeline project.");
+//                } else if (jobClassName.equals("hudson.model.FreeStyleProject")) {
+//                    logger.println("The job is a Freestyle project.");
+//                } else {
+//                    logger.println("The job type is unknown or not supported.");
+//                }
+//            } else {
+//                logger.println("The job was not found.");
+//            }
 
             // instantiate the Crda API implementation
             var exhortApi = new ExhortApi();
@@ -179,9 +220,13 @@ public final class CRDAStep extends Step {
 
                 processReport(analysisReport.get(), listener);
                 saveHtmlReport(htmlReport.get(), listener, workspace);
+                // Archiving the report
+                ArtifactArchiver archiver = new ArtifactArchiver("dependency-analytics-report.html");
+                archiver.perform(run, workspace, getContext().get(EnvVars.class), getContext().get(Launcher.class), listener);
+
                 logger.println("Click on the RHDA Stack Report icon to view the detailed report");
                 logger.println("----- RHDA Analysis Ends -----");
-                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analytics-report.html"));
+                run.addAction(new CRDAAction(crdaUuid, analysisReport.get(), workspace + "/dependency-analytics-report.html", "pipeline"));
                 return (analysisReport.get().getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
 //              // TODO: Enable for the SP.
 //                run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html"));
@@ -212,11 +257,12 @@ public final class CRDAStep extends Step {
             logger.println("");
         }
 
-        private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
+        private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws Exception {
             PrintStream logger = listener.getLogger();
             File file = new File(workspace + "/dependency-analytics-report.html");
             FileUtils.writeByteArrayToFile(file, html);
             logger.println("You can find the detailed HTML report in your workspace.");
+            logger.println("File path: " + file.getAbsolutePath());
         }
 
         private static final long serialVersionUID = 1L;
@@ -224,7 +270,7 @@ public final class CRDAStep extends Step {
 
 
     @Extension
-    @Symbol("crdaAnalysis")
+    @Symbol("rhdaAnalysis")
     public static class DescriptorImpl extends StepDescriptor {
 
     	private final BuilderDescriptorImpl builderDescriptor;
@@ -250,12 +296,12 @@ public final class CRDAStep extends Step {
     	
     	@Override
         public String getFunctionName() {
-            return "crdaAnalysis";
+            return "rhdaAnalysis";
         }
 
         @Override
         public String getDisplayName() {
-            return "Test Invoke Red Hat Dependency Analytics (RHDA)";
+            return "Invoke Red Hat Dependency Analytics (RHDA)";
         }
 
         @Override
