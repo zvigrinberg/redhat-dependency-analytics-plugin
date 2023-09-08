@@ -93,14 +93,14 @@
                 function generateURL(){
 					var currentUrl = window.location.pathname;
 					const pathArray = currentUrl.split("/");
-					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length-3] + "/") + 1;
+					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length-2] + "/") + 1;
 					var baseUrl = currentUrl.substring(0, splitLoc);
 					var url = `${it.jobtype}`
 					if (url === "pipeline") {
 						return baseUrl + "lastSuccessfulBuild/artifact/dependency-analytics-report.html";
 					}
                     else{
-						return baseUrl + "ws/dependency-analytics-report.html";
+						return baseUrl + "artifact/dependency-analytics-report.html";
 					}
                 }
             </script>
