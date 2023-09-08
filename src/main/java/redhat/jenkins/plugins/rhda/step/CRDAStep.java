@@ -26,17 +26,14 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.ArtifactArchiver;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.ArtifactManager;
-import jenkins.model.ArtifactManagerFactory;
-import jenkins.util.BuildListenerAdapter;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -51,6 +48,7 @@ import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -193,27 +191,11 @@ public final class CRDAStep extends Step {
             if (manifestPath.getParent() == null) {
                 manifestPath = Paths.get(workspace.child(step.getFile()).toURI());
             }
-
-//            logger.println("manifestPath: " + manifestPath);
-//            logger.println("workspace: " + workspace);
-//            logger.println("Build Dir: " +run.getRootDir().getPath());
-//            logger.println("reportLocation = " + workspace +"/"+ getContext().get(EnvVars.class).get("BUILD_NUMBER") + "/execution/node/3/ws/");
-
-            // Get the job by name
-//            AbstractItem job = (AbstractItem) jenkins.model.Jenkins.getInstanceOrNull().getItem(run.getParent().getName());
-//            if (job != null) {
-//                String jobClassName = job.getClass().getName();
-//                logger.println("jobClassName = " + jobClassName);
-//                if (jobClassName.equals("org.jenkinsci.plugins.workflow.job.WorkflowJob")) {
-//                    logger.println("The job is a Pipeline project.");
-//                } else if (jobClassName.equals("hudson.model.FreeStyleProject")) {
-//                    logger.println("The job is a Freestyle project.");
-//                } else {
-//                    logger.println("The job type is unknown or not supported.");
-//                }
-//            } else {
-//                logger.println("The job was not found.");
-//            }
+            // Check if the specified file or path exists
+            if (!Files.exists(manifestPath)) {
+                logger.println("The specified file or path does not exist or is inaccessible. Please configure the build properly and retry.");
+                return Config.EXIT_FAILED;
+            }
 
             // instantiate the Crda API implementation
             var exhortApi = new ExhortApi();

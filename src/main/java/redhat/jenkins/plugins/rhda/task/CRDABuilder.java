@@ -50,10 +50,8 @@ import redhat.jenkins.plugins.rhda.credentials.CRDAKey;
 import redhat.jenkins.plugins.rhda.utils.Utils;
 
 import javax.servlet.ServletException;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
@@ -136,6 +134,10 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         Path manifestPath = Paths.get(getFile());
         if (manifestPath.getParent() == null) {
             manifestPath = Paths.get(workspace.child(getFile()).toURI());
+        }
+        // Check if the specified file or path exists
+        if (!Files.exists(manifestPath)) {
+            throw new FileNotFoundException("The specified file or path does not exist or is inaccessible. Please configure the build properly and retry.");
         }
 
         // instantiate the Exhort(crda) API implementation
