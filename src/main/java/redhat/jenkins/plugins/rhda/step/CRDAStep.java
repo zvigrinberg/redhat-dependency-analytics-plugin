@@ -225,7 +225,7 @@ public final class CRDAStep extends Step {
                 ArtifactArchiver archiver = new ArtifactArchiver("dependency-analytics-report.html");
                 archiver.perform(run, workspace, getContext().get(EnvVars.class), getContext().get(Launcher.class), listener);
 
-                logger.println("Click on the RHDA Stack Report icon to view the detailed report");
+                logger.println("Click on the RHDA Stack Report icon to view the detailed report.");
                 logger.println("----- RHDA Analysis Ends -----");
                 run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "pipeline"));
                 return (mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
@@ -259,7 +259,7 @@ public final class CRDAStep extends Step {
             PrintStream logger = listener.getLogger();
             File file = new File(workspace + "/dependency-analytics-report.html");
             FileUtils.writeByteArrayToFile(file, html);
-            logger.println("You can find the detailed HTML report in your workspace and in your build under Build Artifacts.");
+            logger.println("You can find the latest detailed HTML report in your workspace and in your build under Build Artifacts.");
         }
 
         private static final long serialVersionUID = 1L;

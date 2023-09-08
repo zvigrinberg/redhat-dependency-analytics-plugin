@@ -151,7 +151,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             // Archiving the report
             ArtifactArchiver archiver = new ArtifactArchiver("dependency-analytics-report.html");
             archiver.perform(run, workspace, envVars, launcher, listener);
-            logger.println("Click on the RHDA Stack Report icon to view the detailed report");
+            logger.println("Click on the RHDA Stack Report icon to view the detailed report.");
             logger.println("----- RHDA Analysis Ends -----");
             run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "freestyle"));
         } catch (ExecutionException e) {
@@ -248,7 +248,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         PrintStream logger = listener.getLogger();
         File file = new File(workspace + "/dependency-analytics-report.html");
         FileUtils.writeByteArrayToFile(file, html);
-        logger.println("You can find the detailed HTML report in your workspace and in your build under Build Artifacts.");
+        logger.println("You can find the latest detailed HTML report in your workspace and in your build under Build Artifacts.");
     }
 
 }
