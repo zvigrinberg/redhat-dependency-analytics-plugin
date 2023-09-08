@@ -21,6 +21,7 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.DependenciesSummary;
+import com.redhat.exhort.api.ProviderStatus;
 import com.redhat.exhort.api.VulnerabilitiesSummary;
 import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
@@ -230,6 +231,11 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         PrintStream logger = listener.getLogger();
         DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
         VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
+        for (ProviderStatus providerStatus : report.getSummary().getProviderStatuses()) {
+            if(providerStatus.getStatus() != 200){
+                logger.println("WARNING: " + providerStatus.getProvider() + ": " + providerStatus.getMessage());
+            }
+        }
         logger.println("Summary");
         logger.println("  Dependencies");
         logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
