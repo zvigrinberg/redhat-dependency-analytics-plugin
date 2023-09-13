@@ -94,9 +94,9 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         }
         else{
             crdaUuid = RHDAGlobalConfig.get().getUuid();
-            logger.println("UUID Global is already set.");
+//            logger.println("UUID Global is already set.");
         }
-        logger.println("UUID Global-1: " + RHDAGlobalConfig.get().getUuid());
+//        logger.println("UUID Global-1: " + RHDAGlobalConfig.get().getUuid());
 
 
         logger.println("----- RHDA Analysis Begins -----");
