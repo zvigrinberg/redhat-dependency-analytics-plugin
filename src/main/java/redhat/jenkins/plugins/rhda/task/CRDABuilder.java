@@ -16,8 +16,6 @@
 
 package redhat.jenkins.plugins.rhda.task;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.DependenciesSummary;
@@ -29,31 +27,25 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
-import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.security.ACL;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FileUtils;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import redhat.jenkins.plugins.rhda.action.CRDAAction;
-import redhat.jenkins.plugins.rhda.credentials.CRDAKey;
-import redhat.jenkins.plugins.rhda.utils.Utils;
+import redhat.jenkins.plugins.rhda.utils.RHDAGlobalConfig;
 
-import javax.servlet.ServletException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -61,13 +53,11 @@ import java.util.concurrent.ExecutionException;
 public class CRDABuilder extends Builder implements SimpleBuildStep, Serializable {
 
     private String file;
-    private String crdaKeyId;
     private boolean consentTelemetry = false;
 
     @DataBoundConstructor
-    public CRDABuilder(String file, String crdaKeyId, boolean consentTelemetry) {
+    public CRDABuilder(String file, boolean consentTelemetry) {
         this.file = file;
-        this.crdaKeyId = crdaKeyId;
         this.consentTelemetry = consentTelemetry;
     }
 
@@ -78,15 +68,6 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
     @DataBoundSetter
     public void setFile(String file) {
         this.file = file;
-    }
-
-    public String getCrdaKeyId() {
-        return crdaKeyId;
-    }
-
-    @DataBoundSetter
-    public void setCrdaKeyId(String crdaKeyId) {
-        this.crdaKeyId = crdaKeyId;
     }
 
     public boolean getConsentTelemetry() {
@@ -101,10 +82,27 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
+
+        String crdaUuid;
+        RHDAGlobalConfig globalConfig = RHDAGlobalConfig.get();
+//        logger.println("UUID Global: " + RHDAGlobalConfig.get().getUuid());
+        if(RHDAGlobalConfig.get().getUuid() == null){
+            crdaUuid = UUID.randomUUID().toString();
+            globalConfig.setUuid(crdaUuid);
+            // Setting UUID as System property to send to java-api.
+           // System.setProperty("RHDA-TOKEN", uuid);
+        }
+        else{
+            crdaUuid = RHDAGlobalConfig.get().getUuid();
+            logger.println("UUID Global is already set.");
+        }
+        logger.println("UUID Global-1: " + RHDAGlobalConfig.get().getUuid());
+
+
         logger.println("----- RHDA Analysis Begins -----");
-        String crdaUuid = Utils.getCRDACredential(this.getCrdaKeyId());
 
         EnvVars envVars = getEnvVars(run, listener);
+    //    System.setProperty("CONSENT_TELEMETRY", String.valueOf(this.getConsentTelemetry()));
         if(envVars != null){
             // setting system properties to pass to java-api
             if(envVars.get("EXHORT_MVN_PATH") != null ){
@@ -112,6 +110,13 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             }
             else{
                 System.clearProperty("EXHORT_MVN_PATH");
+            }
+
+            if(envVars.get("EXHORT_NPM_PATH") != null ){
+                System.setProperty("EXHORT_NPM_PATH", envVars.get("EXHORT_NPM_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_NPM_PATH");
             }
 
             if(envVars.get("EXHORT_URL") != null ){
@@ -188,34 +193,6 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
                 return FormValidation.error(Messages.CRDABuilder_DescriptorImpl_errors_missingFileName());
             }
             return FormValidation.ok();
-        }
-
-        public FormValidation doCheckCrdaKeyId(@QueryParameter String crdaKeyId)
-                throws IOException, ServletException {
-            int len = crdaKeyId.length();
-            if (len == 0) {
-                return FormValidation.error(Messages.CRDABuilder_DescriptorImpl_errors_missingUuid());
-            }
-            return FormValidation.ok();
-        }
-
-        @SuppressWarnings("deprecation")
-        public ListBoxModel doFillCrdaKeyIdItems(@AncestorInPath Item item, @QueryParameter String crdaKeyId) {
-            StandardListBoxModel model = new StandardListBoxModel();
-            if (item == null) {
-
-                Jenkins jenkins = Jenkins.getInstance();
-                if (!jenkins.hasPermission(Jenkins.ADMINISTER)) {
-                    return model.includeCurrentValue(crdaKeyId);
-                }
-            } else {
-                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
-                    return model.includeCurrentValue(crdaKeyId);
-                }
-            }
-            return model.includeEmptyValue()
-                    .includeAs(ACL.SYSTEM, item, CRDAKey.class)
-                    .includeCurrentValue(crdaKeyId);
         }
 
         @Override
