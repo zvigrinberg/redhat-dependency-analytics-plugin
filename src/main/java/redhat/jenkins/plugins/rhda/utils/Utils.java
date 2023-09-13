@@ -16,32 +16,18 @@
 
 package redhat.jenkins.plugins.rhda.utils;
 
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-
-import hudson.security.ACL;
-import jenkins.model.Jenkins;
-import redhat.jenkins.plugins.rhda.credentials.CRDAKey;
-
-public class Utils {	
-
-	public static String doInstall(String cliVersion, PrintStream logger) {
-    	CRDAInstallation cri = new CRDAInstallation();
-    	return cri.install(cliVersion, logger);
-    }
+public class Utils {
 	
 	public static String doExecute(String cmd, PrintStream logger, Map<String, String> envs) {
 		return new CommandExecutor().execute(cmd, logger, envs);
@@ -92,12 +78,6 @@ public class Utils {
 		String os = getOperatingSystem();
 		return os.toLowerCase().contains("mac");
 	}
-	
-	public static String getCRDACredential(String id) throws IOException, InterruptedException {
-		CRDAKey crdaKey = CredentialsMatchers.firstOrNull(lookupCredentials(CRDAKey.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.emptyList()),
-                                               withId(id));
-		return (crdaKey != null)?crdaKey.getKey().getPlainText():null;
-    }
 	
 	public static boolean is32() {
 		return System.getProperty("sun.arch.data.model").equals("32");

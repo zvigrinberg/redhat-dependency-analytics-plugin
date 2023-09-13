@@ -26,23 +26,20 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.ArtifactArchiver;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.steps.*;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import redhat.jenkins.plugins.rhda.action.CRDAAction;
 import redhat.jenkins.plugins.rhda.task.CRDABuilder.BuilderDescriptorImpl;
 import redhat.jenkins.plugins.rhda.utils.Config;
-import redhat.jenkins.plugins.rhda.utils.Utils;
+import redhat.jenkins.plugins.rhda.utils.RHDAGlobalConfig;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -51,24 +48,17 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public final class CRDAStep extends Step {
     private String file;
-    private String crdaKeyId;
-    private String cliVersion;
     private boolean consentTelemetry = false;
 
     @DataBoundConstructor
-    public CRDAStep(String file, String crdaKeyId, String cliVersion, boolean consentTelemetry) {
+    public CRDAStep(String file, boolean consentTelemetry) {
         this.file = file;
-        this.crdaKeyId = crdaKeyId;
-        this.cliVersion = cliVersion;
         this.consentTelemetry = consentTelemetry;
     }
 
@@ -80,25 +70,7 @@ public final class CRDAStep extends Step {
     public void setFile(String file) {
         this.file = file;
     }
-    
-    public String getCliVersion() {
-        return cliVersion;
-    }
 
-    @DataBoundSetter
-    public void setCliVersion(String cliVersion) {
-        this.cliVersion = cliVersion;
-    }
-
-    public String getCrdaKeyId() {
-        return crdaKeyId;
-    }
-
-    @DataBoundSetter
-    public void setCrdaKeyId(String crdaKeyId) {
-        this.crdaKeyId = crdaKeyId;
-    }
-    
     public boolean getConsentTelemetry() {
         return consentTelemetry;
     }
@@ -138,6 +110,13 @@ public final class CRDAStep extends Step {
                     System.clearProperty("EXHORT_MVN_PATH");
                 }
 
+                if(envVars.get("EXHORT_NPM_PATH") != null ){
+                    System.setProperty("EXHORT_NPM_PATH", envVars.get("EXHORT_NPM_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_NPM_PATH");
+                }
+
                 if(envVars.get("EXHORT_URL") != null ){
                     System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
                 }
@@ -161,23 +140,26 @@ public final class CRDAStep extends Step {
 
             PrintStream logger = getContext().get(TaskListener.class).getLogger();
             logger.println("Red Hat Dependency Analytics Begin");
-            String crdaUuid = "";
+            String crdaUuid;
             Run run = getContext().get(Run.class);
             TaskListener listener = getContext().get(TaskListener.class);
             FilePath workspace = getContext().get(FilePath.class);
 
-            crdaUuid = Utils.getCRDACredential(step.crdaKeyId);
-            if (crdaUuid == null) {
-                logger.println("RHDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
+            RHDAGlobalConfig globalConfig = RHDAGlobalConfig.get();
+            if(RHDAGlobalConfig.get().getUuid() == null){
+                crdaUuid = UUID.randomUUID().toString();
+                globalConfig.setUuid(crdaUuid);
+                // Setting UUID as System property to send to java-api.
+                // System.setProperty("RHDA-TOKEN", uuid);
             }
-
-            if(crdaUuid.equals("")) {
-                logger.println("RHDA Key id '" + step.crdaKeyId + "' was not found in the credentials. Please configure the build properly and retry.");
-                return Config.EXIT_FAILED;
+            else{
+                crdaUuid = RHDAGlobalConfig.get().getUuid();
+//                logger.println("UUID Global is already set.");
             }
 
             System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
+            // flag for telemetry/uuid to pass to backend for SP
+     //       System.setProperty("CONSENT_TELEMETRY", String.valueOf(step.getConsentTelemetry()));
 
             // to get build directory
             // run.getRootDir().getPath();
@@ -262,16 +244,6 @@ public final class CRDAStep extends Step {
 
         public DescriptorImpl() {
           builderDescriptor = new BuilderDescriptorImpl();
-        }
-        
-        @SuppressWarnings("unused")
-        public ListBoxModel doFillCrdaKeyIdItems(@AncestorInPath Item item, @QueryParameter String crdaKeyId) {
-          return builderDescriptor.doFillCrdaKeyIdItems(item, crdaKeyId);
-        }
-        
-        @SuppressWarnings("unused")
-        public FormValidation doCheckCrdaKeyId(@QueryParameter String crdaKeyId) throws IOException, ServletException {
-          return builderDescriptor.doCheckCrdaKeyId(crdaKeyId);
         }
         
         @SuppressWarnings("unused")
