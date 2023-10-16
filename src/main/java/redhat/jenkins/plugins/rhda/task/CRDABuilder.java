@@ -51,6 +51,7 @@ import java.util.concurrent.ExecutionException;
 
 
 public class CRDABuilder extends Builder implements SimpleBuildStep, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String file;
     private boolean consentTelemetry = false;
@@ -85,24 +86,25 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
 
         String crdaUuid;
         RHDAGlobalConfig globalConfig = RHDAGlobalConfig.get();
-//        logger.println("UUID Global: " + RHDAGlobalConfig.get().getUuid());
-        if(RHDAGlobalConfig.get().getUuid() == null){
+        if (globalConfig == null) {
+            globalConfig = new RHDAGlobalConfig();
+        }
+
+        if (globalConfig.getUuid() == null) {
             crdaUuid = UUID.randomUUID().toString();
             globalConfig.setUuid(crdaUuid);
-            // Setting UUID as System property to send to java-api.
-           // System.setProperty("RHDA-TOKEN", uuid);
+        } else {
+            crdaUuid = globalConfig.getUuid();
         }
-        else{
-            crdaUuid = RHDAGlobalConfig.get().getUuid();
-//            logger.println("UUID Global is already set.");
-        }
-//        logger.println("UUID Global-1: " + RHDAGlobalConfig.get().getUuid());
 
+        // Setting UUID as System property to send to java-api.
+        System.setProperty("RHDA_TOKEN", crdaUuid);
+        System.setProperty("RHDA_SOURCE", "jenkins-plugin");
 
         logger.println("----- RHDA Analysis Begins -----");
 
         EnvVars envVars = getEnvVars(run, listener);
-    //    System.setProperty("CONSENT_TELEMETRY", String.valueOf(this.getConsentTelemetry()));
+        System.setProperty("CONSENT_TELEMETRY", String.valueOf(this.getConsentTelemetry()));
         if(envVars != null){
             // setting system properties to pass to java-api
             if(envVars.get("EXHORT_MVN_PATH") != null ){
@@ -119,6 +121,13 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
                 System.clearProperty("EXHORT_NPM_PATH");
             }
 
+            if(envVars.get("EXHORT_GO_PATH") != null ){
+                System.setProperty("EXHORT_GO_PATH", envVars.get("EXHORT_GO_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_GO_PATH");
+            }
+
             if(envVars.get("EXHORT_URL") != null ){
                 System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
             }
@@ -131,6 +140,34 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             }
             else {
                 System.clearProperty("EXHORT_SNYK_TOKEN");
+            }
+
+            if(envVars.get("EXHORT_PYTHON3_PATH") != null ){
+                System.setProperty("EXHORT_PYTHON3_PATH", envVars.get("EXHORT_PYTHON3_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_PYTHON3_PATH");
+            }
+
+            if(envVars.get("EXHORT_PIP3_PATH") != null ){
+                System.setProperty("EXHORT_PIP3_PATH", envVars.get("EXHORT_PIP3_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_PIP3_PATH");
+            }
+
+            if(envVars.get("EXHORT_PYTHON_PATH") != null ){
+                System.setProperty("EXHORT_PYTHON_PATH", envVars.get("EXHORT_PYTHON_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_PYTHON_PATH");
+            }
+
+            if(envVars.get("EXHORT_PIP_PATH") != null ){
+                System.setProperty("EXHORT_PIP_PATH", envVars.get("EXHORT_PIP_PATH"));
+            }
+            else{
+                System.clearProperty("EXHORT_PIP_PATH");
             }
         }
 

@@ -117,6 +117,13 @@ public final class CRDAStep extends Step {
                     System.clearProperty("EXHORT_NPM_PATH");
                 }
 
+                if(envVars.get("EXHORT_GO_PATH") != null ){
+                    System.setProperty("EXHORT_GO_PATH", envVars.get("EXHORT_GO_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_GO_PATH");
+                }
+
                 if(envVars.get("EXHORT_URL") != null ){
                     System.setProperty("EXHORT_URL", envVars.get("EXHORT_URL"));
                 }
@@ -130,6 +137,35 @@ public final class CRDAStep extends Step {
                 else {
                     System.clearProperty("EXHORT_SNYK_TOKEN");
                 }
+
+                if(envVars.get("EXHORT_PYTHON3_PATH") != null ){
+                    System.setProperty("EXHORT_PYTHON3_PATH", envVars.get("EXHORT_PYTHON3_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PYTHON3_PATH");
+                }
+
+                if(envVars.get("EXHORT_PIP3_PATH") != null ){
+                    System.setProperty("EXHORT_PIP3_PATH", envVars.get("EXHORT_PIP3_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PIP3_PATH");
+                }
+
+                if(envVars.get("EXHORT_PYTHON_PATH") != null ){
+                    System.setProperty("EXHORT_PYTHON_PATH", envVars.get("EXHORT_PYTHON_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PYTHON_PATH");
+                }
+
+                if(envVars.get("EXHORT_PIP_PATH") != null ){
+                    System.setProperty("EXHORT_PIP_PATH", envVars.get("EXHORT_PIP_PATH"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PIP_PATH");
+                }
+
             } catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -149,17 +185,17 @@ public final class CRDAStep extends Step {
             if(RHDAGlobalConfig.get().getUuid() == null){
                 crdaUuid = UUID.randomUUID().toString();
                 globalConfig.setUuid(crdaUuid);
-                // Setting UUID as System property to send to java-api.
-                // System.setProperty("RHDA-TOKEN", uuid);
             }
             else{
                 crdaUuid = RHDAGlobalConfig.get().getUuid();
-//                logger.println("UUID Global is already set.");
             }
+            // Setting UUID as System property to send to java-api.
+            System.setProperty("RHDA-TOKEN", crdaUuid);
+            System.setProperty("RHDA_SOURCE", "jenkins-plugin");
 
             System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
             // flag for telemetry/uuid to pass to backend for SP
-     //       System.setProperty("CONSENT_TELEMETRY", String.valueOf(step.getConsentTelemetry()));
+            System.setProperty("CONSENT_TELEMETRY", String.valueOf(step.getConsentTelemetry()));
 
             // to get build directory
             // run.getRootDir().getPath();

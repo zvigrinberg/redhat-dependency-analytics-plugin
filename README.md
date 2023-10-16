@@ -46,6 +46,11 @@ There is a way to set a custom Maven path using <em>Environment Variables</em>.
 - Set the corresponding custom path based on your project: 
   - For Maven - Set Name: _EXHORT_MVN_PATH_ and Value: `/path/to/custom/mvn`.
   - For NPM - Set Name: _EXHORT_NPM_PATH_ and Value: `/path/to/custom/npm`.
+  - For GO - Set Name: _EXHORT_GO_PATH_ and Value: `/path/to/custom/go`.
+  - For Python3 - Set Name: _EXHORT_PYTHON3_PATH_ and Value: `/path/to/custom/python3`.
+  - For Pip3 - Set Name: _EXHORT_PIP3_PATH_ and Value: `/path/to/custom/pip3`.
+  - For Python - Set Name: _EXHORT_PYTHON_PATH_ and Value: `/path/to/custom/python`.
+  - For Pip - Set Name: _EXHORT_PIP_PATH_ and Value: `/path/to/custom/pip`.
 
 If you have a Snyk token, add that as an environment variable:
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
