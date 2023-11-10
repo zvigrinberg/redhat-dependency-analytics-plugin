@@ -1,109 +1,201 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
-		<style>
-			table {
-			  font-family: arial, sans-serif;
-			  border-collapse: collapse;
-			  width: 30%;
-			}
-			
-			td, th {
-			  border: 1px solid #dddddd;
-			  text-align: left;
-			  padding: 8px;
-			}
-			
-			tr:nth-child(even) {
-			  background-color: #dddddd;
-			}
-		</style>
-		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-						
-		<script type="text/javascript">
-			// Load google charts
-			google.charts.load('current', {'packages':['corechart']});
-			google.charts.setOnLoadCallback(drawChart);
-			
-			// Draw the chart and set the chart values
-			function drawChart() {
-			  var data = google.visualization.arrayToDataTable([
-			  ['Severity', 'Vulnerabilities'],
-			  ['Low', ${it.report.getSummary().getVulnerabilities().getLow()}],
-			  ['Medium', ${it.report.getSummary().getVulnerabilities().getMedium()}],
-			  ['High', ${it.report.getSummary().getVulnerabilities().getHigh()}],
-			  ['Critical', ${it.report.getSummary().getVulnerabilities().getCritical()}]
+	<style>
+		table {
+		font-family: arial, sans-serif;
+		border-collapse: collapse;
+		width: 30%;
+		}
+
+		td, th {
+		border: 1px solid #dddddd;
+		text-align: left;
+		padding: 8px;
+		}
+
+		tr:nth-child(even) {
+		background-color: #dddddd;
+		}
+	</style>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+	<script type="text/javascript">
+		// Load google charts
+		google.charts.load('current', {'packages': ['corechart']});
+		google.charts.setOnLoadCallback(drawCharts);
+
+		function getData() {
+			console.log("getData()");
+			console.log("scanned total", ${it.report.scanned.total});
+			console.log("message", ${it.report.providers["snyk"].status.message});
+			console.log("high", ${it.report.providers["snyk"].sources["snyk"].summary.high});
+
+			const keysArray = Object.keys(${it.report.providers});
+			keysArray.forEach(key => {
+				console.log('Key:', ${key});
+			});
+
+			//var entryset = providers.keySet();
+			// console.log("Newkeys:", ${entryset});
+			// for (const [key, value] of entrySet) {
+			// 	console.log(`Key: ${key}, Value:`, value);
+			// 	// Do something with each key-value pair
+			// }
+
+			// var providerKeys = Object.keys(${it.report.providers});
+			// providerKeys.forEach(key => {
+			// 	console.log("Key:", ${key});
+			// 	const value = it.report.providers[key];
+			// 	console.log("Key: ${key}, Value:", value);
+			// });
+
+
+			// for (const providerKey in ${it.report.providers.keys()}) {
+			// 	console.log("Provider: ${providerKey}");
+			// 	if (it.report.providers.hasOwnProperty(providerKey)) {
+			// 		const statusMessage = ${it.report.providers[providerKey].status.message};
+			// 		console.log("Provider: ${providerKey}, Status Message: ${statusMessage}");
+			// 		// Access other properties of it.report.providers[providerKey] as needed
+			// 	}
+			// }
+
+
+			// Logging map object to console
+		//	var providers = ${it.report.providers};
+        //     var providers = new Map(${it.report.providers});
+		// 	providers.forEach((values, keys) => {
+		// 		console.log("keys1", keys)
+		// 		console.log("keys", {keys})
+		// 		// console.log(values, keys);
+		// 	});
+			// var providers = ${it.report.providers.sources}; // Assuming it.report.getProviders() returns a Map
+			// for (var [key, value] of providers) {
+			// 	console.log(key, value);
+			// }
+			// 	// Now you can use key and value to draw your chart
+			// 	// drawChart(key, value);
+			// }
+			// providers.forEach(function (entry) {
+			// 	var providerKey = entry[0];
+			// 	var providerData = entry[1];
+
+			// providers = JSON.parse(providers); // Parse the JSON string
+			// Object.keys(providers).forEach(function (providerKey) {
+			// 	var providerData = providers[providerKey];
+			// 	console.log(providerData.sources); // Assuming providerData.sources contains the data for drawing the chart
+			// 	drawChart(providerKey, providerData);
+			// });
+			//drawChart();
+		}
+
+		// Draw the chart and set the chart values
+		function drawChart() {
+			console.log("executing drawChart()")
+			const chartData = getData();
+			var data = google.visualization.arrayToDataTable([
+				// ['Severity', 'Vulnerabilities'],
+				// ['Low', ${it.report.getSummary().getVulnerabilities().getLow()}],
+				// ['Medium', ${it.report.getSummary().getVulnerabilities().getMedium()}],
+				// ['High', ${it.report.getSummary().getVulnerabilities().getHigh()}],
+				// ['Critical', ${it.report.getSummary().getVulnerabilities().getCritical()}]
+
+				['Severity', 'Vulnerabilities'],
+				['Low', 5],
+				['Medium', 8],
+				['High', 10],
+				['Critical', 7]
 			]);
-			  var options = {'title':'Severity of Vulnerabilities', 'width':450, 'height':300, pieSliceText: 'value',
-			  is3D: true, titleTextStyle: { fontSize: 18}, legend:{textStyle: {color: 'blue', fontSize: 15}}, fontSize:15,
-			  slices: {0: {color: '#cccc00'}, 1:{color: '#ffa500'}, 2:{color: '#ff0000'}, 3: {color: '#800000'}}};
-			  var pie = document.getElementById('vulnchart');
-			  if (${it.report.getSummary().getDependencies().getScanned()} > 0) {
-				  pie.style.display = "block";							  
-				  var chart = new google.visualization.PieChart(pie);							  
-				  chart.draw(data, options);
-			  }
-			  else {
-			  	pie.style.display = "none";
-			  }
-			}
-		</script>
-    <l:layout title="RHDA Stack Report">
-        <l:side-panel>
-            <st:include page="sidepanel.jelly" it="${it.run}" optional="true" />
-        </l:side-panel>
-        <l:main-panel>        		
-            <h2>
-                Analysis Symmary
-            </h2>
-            <h3>Dependency Details</h3>
-            <table>
-            	<tr>
-						    <th>Keyword</th>
-						    <th>Value</th>
-						  </tr>
-						  <tr>
-						    <td>Scanned dependencies</td>
-						    <td>${it.report.getSummary().getDependencies().getScanned()}</td>
-						  </tr>
-						  <tr>
-						    <td>Transitive dependencies</td>
-						    <td>${it.report.getSummary().getDependencies().getTransitive()}</td>
-						  </tr>
-						</table>
-						<h3>Vulnerability Details</h3>
-						<table>
-							<tr>
-						    <th>Keyword</th>
-						    <th>Value</th>
-						  </tr>
-						  <tr>
-						    <td>Total Vulnerabilities</td>
-						    <td>${it.report.getSummary().getVulnerabilities().getTotal()}</td>
-						  </tr>
-						  <tr>
-						    <td>Direct Vulnerabilities</td>
-						    <td>${it.report.getSummary().getVulnerabilities().getDirect()}</td>
-						  </tr>
-						</table>
-            <div id="vulnchart"></div>						
-            <div name="input">
-                <input type="button" onclick="window.open(generateURL(),'_blank');" value="RHDA Report (Details)" />
-            </div>
-            <script>
-                function generateURL(){
+			var options = {
+				'title': 'Severity of Vulnerabilities',
+				'width': 450,
+				'height': 300,
+				pieSliceText: 'value',
+				is3D: true,
+				titleTextStyle: {fontSize: 18},
+				legend: {textStyle: {color: 'blue', fontSize: 15}},
+				fontSize: 15,
+				slices: {0: {color: '#cccc00'}, 1: {color: '#ffa500'}, 2: {color: '#ff0000'}, 3: {color: '#800000'}}
+			};
+			var pie = document.getElementById('vulnchart');
+			// if (${it.report.getSummary().getDependencies().getScanned()} > 0) {
+			pie.style.display = "block";
+			var chart = new google.visualization.PieChart(pie);
+			chart.draw(data, options);
+			// 	}
+			// else {
+			// 		pie.style.display = "none";
+			// 	}
+		}
+	</script>
+	<l:layout title="RHDA Stack Report">
+		<l:side-panel>
+			<st:include page="sidepanel.jelly" it="${it.run}" optional="true" />
+		</l:side-panel>
+		<l:main-panel>
+			<h2>
+				Analysis Symmary
+			</h2>
+			<!-- Iterate over the map entries -->
+			<j:forEach var="entry" items="${it.report.getProviders().entrySet()}">
+				<j:set var="key" value="${entry.key}"/>
+				<j:set var="value" value="${entry.value}"/>
+
+				<h3>Provider: ${key}</h3>
+				<h5>Dependency Details</h5>
+				<table>
+					<tr>
+						<th>Keyword</th>
+						<th>Value</th>
+					</tr>
+					<tr>
+						<td>Total Scanned dependencies</td>
+						<td>${it.report.getScanned().getTotal()}</td>
+					</tr>
+					<tr>
+						<td>Total Direct dependencies</td>
+						<td>${it.report.getScanned().getDirect()}</td>
+					</tr>
+					<tr>
+						<td>Total Transitive dependencies</td>
+						<td>${it.report.getScanned().getTransitive()}</td>
+					</tr>
+				</table>
+				<div style="margin-top: 20px;">
+					<h5>Vulnerability Details</h5>
+				</div>
+				<table>
+					<tr>
+						<th>Keyword</th>
+						<th>Value</th>
+					</tr>
+					<tr>
+						<td>Total Vulnerabilities</td>
+						<td>${value.getSources().get(key).getSummary().getTotal()}</td>
+					</tr>
+					<tr>
+						<td>Direct Dependencies</td>
+						<td>${value.getSources().get(key).getSummary().getDependencies()}</td>
+					</tr>
+				</table>
+				<div id="vulnchart"></div>
+			</j:forEach>
+			<div name="input">
+				<input type="button" onclick="window.open(generateURL(),'_blank');" value="RHDA Report (Details)"/>
+			</div>
+			<script>
+				function generateURL() {
 					var currentUrl = window.location.pathname;
 					const pathArray = currentUrl.split("/");
-					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length-2] + "/") + 1;
+					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length - 2] + "/") + 1;
 					var baseUrl = currentUrl.substring(0, splitLoc);
 					var url = `${it.jobtype}`
 					if (url === "pipeline") {
 						return baseUrl + "lastSuccessfulBuild/artifact/dependency-analytics-report.html";
-					}
-                    else{
+					} else {
 						return baseUrl + "artifact/dependency-analytics-report.html";
 					}
-                }
-            </script>
-        </l:main-panel>
-    </l:layout>
+				}
+			</script>
+		</l:main-panel>
+	</l:layout>
 </j:jelly>
