@@ -110,8 +110,12 @@
                         <td>${value.getSources().get(key).getSummary().getTotal()}</td>
                     </tr>
                     <tr>
-                        <td>Direct Dependencies</td>
-                        <td>${value.getSources().get(key).getSummary().getDependencies()}</td>
+                        <td>Direct Vulnerabilities</td>
+                        <td>${value.getSources().get(key).getSummary().getDirect()}</td>
+                    </tr>
+                    <tr>
+                        <td>Transitive Vulnerabilities</td>
+                        <td>${value.getSources().get(key).getSummary().getTransitive()}</td>
                     </tr>
                 </table>
                 <div id="vulnchart_${key}"></div>

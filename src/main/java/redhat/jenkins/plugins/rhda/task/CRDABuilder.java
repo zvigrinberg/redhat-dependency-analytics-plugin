@@ -267,6 +267,7 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
                 logger.println("  Vulnerabilities");
                 logger.println("    Total: " + value.getSources().get(key).getSummary().getTotal());
                 logger.println("    Direct: " + value.getSources().get(key).getSummary().getDirect());
+                logger.println("    Transitive: " + value.getSources().get(key).getSummary().getTransitive());
                 logger.println("    Critical: " + value.getSources().get(key).getSummary().getCritical());
                 logger.println("    High: " + value.getSources().get(key).getSummary().getHigh());
                 logger.println("    Medium: " + value.getSources().get(key).getSummary().getMedium());
