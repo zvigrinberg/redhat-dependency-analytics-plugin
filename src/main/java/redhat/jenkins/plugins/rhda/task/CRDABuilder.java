@@ -171,6 +171,20 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             else{
                 System.clearProperty("EXHORT_PIP_PATH");
             }
+
+            if(envVars.get("EXHORT_OSS_INDEX_USER") != null ){
+                System.setProperty("EXHORT_OSS_INDEX_USER", envVars.get("EXHORT_OSS_INDEX_USER"));
+            }
+            else{
+                System.clearProperty("EXHORT_OSS_INDEX_USER");
+            }
+
+            if(envVars.get("EXHORT_OSS_INDEX_TOKEN") != null ){
+                System.setProperty("EXHORT_OSS_INDEX_TOKEN", envVars.get("EXHORT_OSS_INDEX_TOKEN"));
+            }
+            else{
+                System.clearProperty("EXHORT_OSS_INDEX_TOKEN");
+            }
         }
 
         System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
