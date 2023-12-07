@@ -187,7 +187,12 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             }
         }
 
-        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
+//        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
+//        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+        System.clearProperty("hudson.model.DirectoryBrowserSupport.CSP");
+        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox; default-src 'none';");
+        logger.println("CSP Property:");
+        logger.println(System.getProperty("hudson.model.DirectoryBrowserSupport.CSP"));
 
         // TODO: REMOVE before deploying to prod
         System.setProperty("EXHORT_DEV_MODE","true");
@@ -317,6 +322,8 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
     private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         File file = new File(workspace + "/dependency-analytics-report.html");
+        FilePath htmlReportFile = workspace.child("dependency-analytics-report.html");
+        logger.println("htmlReportFile Path: " + htmlReportFile.getRemote());
         FileUtils.writeByteArrayToFile(file, html);
         logger.println("You can find the latest detailed HTML report in your workspace and in your build under Build Artifacts.");
     }
