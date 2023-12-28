@@ -18,9 +18,9 @@ package redhat.jenkins.plugins.rhda.step;
 
 import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.api.DependenciesSummary;
-import com.redhat.exhort.api.ProviderStatus;
-import com.redhat.exhort.api.VulnerabilitiesSummary;
+//import com.redhat.exhort.api.DependenciesSummary;
+//import com.redhat.exhort.api.ProviderStatus;
+//import com.redhat.exhort.api.VulnerabilitiesSummary;
 import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -166,6 +166,20 @@ public final class CRDAStep extends Step {
                     System.clearProperty("EXHORT_PIP_PATH");
                 }
 
+                if(envVars.get("EXHORT_OSS_INDEX_USER") != null ){
+                    System.setProperty("EXHORT_OSS_INDEX_USER", envVars.get("EXHORT_OSS_INDEX_USER"));
+                }
+                else{
+                    System.clearProperty("EXHORT_OSS_INDEX_USER");
+                }
+
+                if(envVars.get("EXHORT_OSS_INDEX_TOKEN") != null ){
+                    System.setProperty("EXHORT_OSS_INDEX_TOKEN", envVars.get("EXHORT_OSS_INDEX_TOKEN"));
+                }
+                else{
+                    System.clearProperty("EXHORT_OSS_INDEX_TOKEN");
+                }
+
             } catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -193,7 +207,6 @@ public final class CRDAStep extends Step {
             System.setProperty("RHDA-TOKEN", crdaUuid);
             System.setProperty("RHDA_SOURCE", "jenkins-plugin");
 
-            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
             // flag for telemetry/uuid to pass to backend for SP
             System.setProperty("CONSENT_TELEMETRY", String.valueOf(step.getConsentTelemetry()));
 
@@ -229,7 +242,9 @@ public final class CRDAStep extends Step {
                 logger.println("Click on the RHDA Stack Report icon to view the detailed report.");
                 logger.println("----- RHDA Analysis Ends -----");
                 run.addAction(new CRDAAction(crdaUuid, mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "pipeline"));
-                return (mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
+//                return (mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
+                return Config.EXIT_SUCCESS ;
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -240,25 +255,27 @@ public final class CRDAStep extends Step {
 
         private void processReport(AnalysisReport report, TaskListener listener) throws ExecutionException, InterruptedException {
             PrintStream logger = listener.getLogger();
-            DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
-            VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
-            for (ProviderStatus providerStatus : report.getSummary().getProviderStatuses()) {
-                if(providerStatus.getStatus() != 200){
-                    logger.println("WARNING: " + providerStatus.getProvider() + ": " + providerStatus.getMessage());
-                }
-            }
-            logger.println("Summary");
-            logger.println("  Dependencies");
-            logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
-            logger.println("    Transitive dependencies: " + dependenciesSummary.getTransitive());
-            logger.println("  Vulnerabilities");
-            logger.println("    Total: " + vulnerabilitiesSummary.getTotal());
-            logger.println("    Direct: " + vulnerabilitiesSummary.getDirect());
-            logger.println("    Critical: " + vulnerabilitiesSummary.getCritical());
-            logger.println("    High: " + vulnerabilitiesSummary.getHigh());
-            logger.println("    Medium: " + vulnerabilitiesSummary.getMedium());
-            logger.println("    Low: " + vulnerabilitiesSummary.getLow());
-            logger.println("");
+            logger.println("Multi source step");
+            logger.println(report);
+//            DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
+//            VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
+//            for (ProviderStatus providerStatus : report.getSummary().getProviderStatuses()) {
+//                if(providerStatus.getStatus() != 200){
+//                    logger.println("WARNING: " + providerStatus.getProvider() + ": " + providerStatus.getMessage());
+//                }
+//            }
+//            logger.println("Summary");
+//            logger.println("  Dependencies");
+//            logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
+//            logger.println("    Transitive dependencies: " + dependenciesSummary.getTransitive());
+//            logger.println("  Vulnerabilities");
+//            logger.println("    Total: " + vulnerabilitiesSummary.getTotal());
+//            logger.println("    Direct: " + vulnerabilitiesSummary.getDirect());
+//            logger.println("    Critical: " + vulnerabilitiesSummary.getCritical());
+//            logger.println("    High: " + vulnerabilitiesSummary.getHigh());
+//            logger.println("    Medium: " + vulnerabilitiesSummary.getMedium());
+//            logger.println("    Low: " + vulnerabilitiesSummary.getLow());
+//            logger.println("");
         }
 
         private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws Exception {
