@@ -187,17 +187,6 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             }
         }
 
-//        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
-//        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
-        System.clearProperty("hudson.model.DirectoryBrowserSupport.CSP");
-        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox; default-src 'none';");
-        logger.println("CSP Property:");
-        logger.println(System.getProperty("hudson.model.DirectoryBrowserSupport.CSP"));
-
-        // TODO: REMOVE before deploying to prod
-        System.setProperty("EXHORT_DEV_MODE","true");
-        System.setProperty("DEV_EXHORT_BACKEND_URL", "https://exhort.stage.devshift.net");
-
         Path manifestPath = Paths.get(getFile());
         if (manifestPath.getParent() == null) {
             manifestPath = Paths.get(workspace.child(getFile()).toURI());
@@ -272,26 +261,28 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
         PrintStream logger = listener.getLogger();
         logger.println("Summary");
         logger.println("  Dependencies");
-        logger.println("    Total Scanned dependencies:    " + report.getScanned().getTotal());
+        logger.println("    Total Scanned dependencies: " + report.getScanned().getTotal());
         logger.println("    Total Direct dependencies: " + report.getScanned().getDirect());
         logger.println("    Transitive dependencies: " + report.getScanned().getTransitive());
         Map<String, ProviderReport> providers = report.getProviders();
         providers.forEach((key, value) -> {
-            logger.println("");
-            logger.println("Provider: " + key);
-            if(value.getStatus().getCode() != 200){
-                logger.println("WARNING: " + key + ": " + value.getStatus().getMessage());
-            }
-            if(value.getSources() != null) {
-                logger.println("  Vulnerabilities");
-                logger.println("    Total: " + value.getSources().get(key).getSummary().getTotal());
-                logger.println("    Direct: " + value.getSources().get(key).getSummary().getDirect());
-                logger.println("    Transitive: " + value.getSources().get(key).getSummary().getTransitive());
-                logger.println("    Critical: " + value.getSources().get(key).getSummary().getCritical());
-                logger.println("    High: " + value.getSources().get(key).getSummary().getHigh());
-                logger.println("    Medium: " + value.getSources().get(key).getSummary().getMedium());
-                logger.println("    Low: " + value.getSources().get(key).getSummary().getLow());
+            if(!key.equalsIgnoreCase("trusted-content")) {
                 logger.println("");
+                logger.println("Provider: " + key);
+                if (value.getStatus().getCode() != 200) {
+                    logger.println("WARNING: " + key + ": " + value.getStatus().getMessage());
+                }
+                if (value.getSources() != null) {
+                    logger.println("  Vulnerabilities");
+                    logger.println("    Total: " + value.getSources().get(key).getSummary().getTotal());
+                    logger.println("    Direct: " + value.getSources().get(key).getSummary().getDirect());
+                    logger.println("    Transitive: " + value.getSources().get(key).getSummary().getTransitive());
+                    logger.println("    Critical: " + value.getSources().get(key).getSummary().getCritical());
+                    logger.println("    High: " + value.getSources().get(key).getSummary().getHigh());
+                    logger.println("    Medium: " + value.getSources().get(key).getSummary().getMedium());
+                    logger.println("    Low: " + value.getSources().get(key).getSummary().getLow());
+                    logger.println("");
+                }
             }
         });
 
@@ -322,8 +313,6 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
     private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         File file = new File(workspace + "/dependency-analytics-report.html");
-        FilePath htmlReportFile = workspace.child("dependency-analytics-report.html");
-        logger.println("htmlReportFile Path: " + htmlReportFile.getRemote());
         FileUtils.writeByteArrayToFile(file, html);
         logger.println("You can find the latest detailed HTML report in your workspace and in your build under Build Artifacts.");
     }
