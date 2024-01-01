@@ -18,9 +18,10 @@ package redhat.jenkins.plugins.rhda.task;
 
 import com.redhat.exhort.Api;
 import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.api.DependenciesSummary;
-import com.redhat.exhort.api.ProviderStatus;
-import com.redhat.exhort.api.VulnerabilitiesSummary;
+//import com.redhat.exhort.api.DependenciesSummary;
+//import com.redhat.exhort.api.ProviderStatus;
+//import com.redhat.exhort.api.VulnerabilitiesSummary;
+import com.redhat.exhort.api.ProviderReport;
 import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -45,6 +46,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -169,9 +171,21 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
             else{
                 System.clearProperty("EXHORT_PIP_PATH");
             }
-        }
 
-        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
+            if(envVars.get("EXHORT_OSS_INDEX_USER") != null ){
+                System.setProperty("EXHORT_OSS_INDEX_USER", envVars.get("EXHORT_OSS_INDEX_USER"));
+            }
+            else{
+                System.clearProperty("EXHORT_OSS_INDEX_USER");
+            }
+
+            if(envVars.get("EXHORT_OSS_INDEX_TOKEN") != null ){
+                System.setProperty("EXHORT_OSS_INDEX_TOKEN", envVars.get("EXHORT_OSS_INDEX_TOKEN"));
+            }
+            else{
+                System.clearProperty("EXHORT_OSS_INDEX_TOKEN");
+            }
+        }
 
         Path manifestPath = Paths.get(getFile());
         if (manifestPath.getParent() == null) {
@@ -245,25 +259,55 @@ public class CRDABuilder extends Builder implements SimpleBuildStep, Serializabl
 
     private void processReport(AnalysisReport report, TaskListener listener) throws ExecutionException, InterruptedException {
         PrintStream logger = listener.getLogger();
-        DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
-        VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
-        for (ProviderStatus providerStatus : report.getSummary().getProviderStatuses()) {
-            if(providerStatus.getStatus() != 200){
-                logger.println("WARNING: " + providerStatus.getProvider() + ": " + providerStatus.getMessage());
-            }
-        }
         logger.println("Summary");
         logger.println("  Dependencies");
-        logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
-        logger.println("    Transitive dependencies: " + dependenciesSummary.getTransitive());
-        logger.println("  Vulnerabilities");
-        logger.println("    Total: " + vulnerabilitiesSummary.getTotal());
-        logger.println("    Direct: " + vulnerabilitiesSummary.getDirect());
-        logger.println("    Critical: " + vulnerabilitiesSummary.getCritical());
-        logger.println("    High: " + vulnerabilitiesSummary.getHigh());
-        logger.println("    Medium: " + vulnerabilitiesSummary.getMedium());
-        logger.println("    Low: " + vulnerabilitiesSummary.getLow());
+        logger.println("    Total Scanned dependencies: " + report.getScanned().getTotal());
+        logger.println("    Total Direct dependencies: " + report.getScanned().getDirect());
+        logger.println("    Transitive dependencies: " + report.getScanned().getTransitive());
+        Map<String, ProviderReport> providers = report.getProviders();
+        providers.forEach((key, value) -> {
+            if(!key.equalsIgnoreCase("trusted-content")) {
+                logger.println("");
+                logger.println("Provider: " + key);
+                if (value.getStatus().getCode() != 200) {
+                    logger.println("WARNING: " + key + ": " + value.getStatus().getMessage());
+                }
+                if (value.getSources() != null) {
+                    logger.println("  Vulnerabilities");
+                    logger.println("    Total: " + value.getSources().get(key).getSummary().getTotal());
+                    logger.println("    Direct: " + value.getSources().get(key).getSummary().getDirect());
+                    logger.println("    Transitive: " + value.getSources().get(key).getSummary().getTransitive());
+                    logger.println("    Critical: " + value.getSources().get(key).getSummary().getCritical());
+                    logger.println("    High: " + value.getSources().get(key).getSummary().getHigh());
+                    logger.println("    Medium: " + value.getSources().get(key).getSummary().getMedium());
+                    logger.println("    Low: " + value.getSources().get(key).getSummary().getLow());
+                    logger.println("");
+                }
+            }
+        });
+
         logger.println("");
+
+//        logger.println(report);
+//        DependenciesSummary dependenciesSummary = report.getSummary().getDependencies();
+//        VulnerabilitiesSummary vulnerabilitiesSummary = report.getSummary().getVulnerabilities();
+//        for (ProviderStatus providerStatus : report.getSummary().getProviderStatuses()) {
+//            if(providerStatus.getStatus() != 200){
+//                logger.println("WARNING: " + providerStatus.getProvider() + ": " + providerStatus.getMessage());
+//            }
+//        }
+//        logger.println("Summary");
+//        logger.println("  Dependencies");
+//        logger.println("    Scanned dependencies:    " + dependenciesSummary.getScanned());
+//        logger.println("    Transitive dependencies: " + dependenciesSummary.getTransitive());
+//        logger.println("  Vulnerabilities");
+//        logger.println("    Total: " + vulnerabilitiesSummary.getTotal());
+//        logger.println("    Direct: " + vulnerabilitiesSummary.getDirect());
+//        logger.println("    Critical: " + vulnerabilitiesSummary.getCritical());
+//        logger.println("    High: " + vulnerabilitiesSummary.getHigh());
+//        logger.println("    Medium: " + vulnerabilitiesSummary.getMedium());
+//        logger.println("    Low: " + vulnerabilitiesSummary.getLow());
+//        logger.println("");
     }
 
     private void saveHtmlReport(byte[] html, TaskListener listener, FilePath workspace) throws IOException, InterruptedException {

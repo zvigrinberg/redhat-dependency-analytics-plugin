@@ -1,107 +1,163 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
-		<style>
-			table {
-			  font-family: arial, sans-serif;
-			  border-collapse: collapse;
-			  width: 30%;
-			}
-			
-			td, th {
-			  border: 1px solid #dddddd;
-			  text-align: left;
-			  padding: 8px;
-			}
-			
-			tr:nth-child(even) {
-			  background-color: #dddddd;
-			}
-		</style>
-		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-						
-		<script type="text/javascript">
-			// Load google charts
-			google.charts.load('current', {'packages':['corechart']});
-			google.charts.setOnLoadCallback(drawChart);
-			
-			// Draw the chart and set the chart values
-			function drawChart() {
-			  var data = google.visualization.arrayToDataTable([
-			  ['Severity', 'Vulnerabilities'],
-			  ['Low', ${it.report.getSummary().getVulnerabilities().getLow()}],
-			  ['Medium', ${it.report.getSummary().getVulnerabilities().getMedium()}],
-			  ['High', ${it.report.getSummary().getVulnerabilities().getHigh()}],
-			  ['Critical', ${it.report.getSummary().getVulnerabilities().getCritical()}]
-			]);
-			  var options = {'title':'Severity of Vulnerabilities', 'width':450, 'height':300, pieSliceText: 'value',
-			  is3D: true, titleTextStyle: { fontSize: 18}, legend:{textStyle: {color: 'blue', fontSize: 15}}, fontSize:15,
-			  slices: {0: {color: '#cccc00'}, 1:{color: '#ffa500'}, 2:{color: '#ff0000'}, 3: {color: '#800000'}}};
-			  var pie = document.getElementById('vulnchart');
-			  if (${it.report.getSummary().getDependencies().getScanned()} > 0) {
-				  pie.style.display = "block";							  
-				  var chart = new google.visualization.PieChart(pie);							  
-				  chart.draw(data, options);
-			  }
-			  else {
-			  	pie.style.display = "none";
-			  }
-			}
-		</script>
+    <style>
+        table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 30%;
+        }
+
+        td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+        }
+
+        tr:nth-child(even) {
+        background-color: #dddddd;
+        }
+    </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+        // Load google charts
+        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.setOnLoadCallback(getData);
+
+        function getData() {
+        <j:forEach var="entry" items="${it.report.getProviders().entrySet()}">
+            <j:set var="key" value="${entry.key}"/>
+            <j:set var="value" value="${entry.value}"/>
+            <j:choose>
+                <j:when test="${key != 'trusted-content'}">
+                    drawChart('${key}', ${value.getSources().get(key).getSummary().getLow()},
+                    ${value.getSources().get(key).getSummary().getMedium()},
+                    ${value.getSources().get(key).getSummary().getHigh()},
+                    ${value.getSources().get(key).getSummary().getCritical()});
+                </j:when>
+            </j:choose>
+        </j:forEach>
+        }
+
+        // Draw the chart and set the chart values
+        function drawChart(providerKey, low, medium, high, critical) {
+        var data = google.visualization.arrayToDataTable([
+        ['Severity', 'Vulnerabilities'],
+        ['Low', low],
+        ['Medium', medium],
+        ['High', high],
+        ['Critical', critical]
+        ]);
+
+        var options = {
+        'title': 'Severity of Vulnerabilities',
+        'width': 450,
+        'height': 300,
+        pieSliceText: 'value',
+        is3D: true,
+        titleTextStyle: {fontSize: 18},
+        legend: {textStyle: {color: 'blue', fontSize: 15}},
+        fontSize: 15,
+        slices: {0: {color: '#cccc00'}, 1: {color: '#ffa500'}, 2: {color: '#ff0000'}, 3: {color: '#800000'}}
+        };
+
+        var chartDivId = 'vulnchart_' + providerKey;
+        var pie = document.getElementById(chartDivId);
+        pie.style.display = "block";
+        var chart = new google.visualization.PieChart(pie);
+        chart.draw(data, options);
+        }
+    </script>
     <l:layout title="RHDA Stack Report">
         <l:side-panel>
-            <st:include page="sidepanel.jelly" it="${it.run}" optional="true" />
+            <st:include page="sidepanel.jelly" it="${it.run}" optional="true"/>
         </l:side-panel>
-        <l:main-panel>        		
+        <l:main-panel>
             <h2>
                 Analysis Symmary
             </h2>
-            <h3>Dependency Details</h3>
-            <table>
-            	<tr>
-						    <th>Keyword</th>
-						    <th>Value</th>
-						  </tr>
-						  <tr>
-						    <td>Scanned dependencies</td>
-						    <td>${it.report.getSummary().getDependencies().getScanned()}</td>
-						  </tr>
-						  <tr>
-						    <td>Transitive dependencies</td>
-						    <td>${it.report.getSummary().getDependencies().getTransitive()}</td>
-						  </tr>
-						</table>
-						<h3>Vulnerability Details</h3>
-						<table>
-							<tr>
-						    <th>Keyword</th>
-						    <th>Value</th>
-						  </tr>
-						  <tr>
-						    <td>Total Vulnerabilities</td>
-						    <td>${it.report.getSummary().getVulnerabilities().getTotal()}</td>
-						  </tr>
-						  <tr>
-						    <td>Direct Vulnerabilities</td>
-						    <td>${it.report.getSummary().getVulnerabilities().getDirect()}</td>
-						  </tr>
-						</table>
-            <div id="vulnchart"></div>						
+            <!-- Iterate over the map entries -->
+            <j:forEach var="entry" items="${it.report.getProviders().entrySet()}">
+                <j:set var="key" value="${entry.key}"/>
+                <j:set var="value" value="${entry.value}"/>
+                <j:choose>
+                    <j:when test="${key != 'trusted-content'}">
+                        <h3>Provider: ${key}</h3>
+                        <h5>Dependency Details</h5>
+                        <table>
+                            <tr>
+                                <th>Keyword</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>Total Scanned dependencies</td>
+                                <td>${it.report.getScanned().getTotal()}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Direct dependencies</td>
+                                <td>${it.report.getScanned().getDirect()}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Transitive dependencies</td>
+                                <td>${it.report.getScanned().getTransitive()}</td>
+                            </tr>
+                        </table>
+                        <div style="margin-top: 20px;">
+                            <h5>Vulnerability Details</h5>
+                        </div>
+                        <table>
+                            <tr>
+                                <th>Keyword</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>Total Vulnerabilities</td>
+                                <td>${value.getSources().get(key).getSummary().getTotal()}</td>
+                            </tr>
+                            <tr>
+                                <td>Direct Vulnerabilities</td>
+                                <td>${value.getSources().get(key).getSummary().getDirect()}</td>
+                            </tr>
+                            <tr>
+                                <td>Transitive Vulnerabilities</td>
+                                <td>${value.getSources().get(key).getSummary().getTransitive()}</td>
+                            </tr>
+                        </table>
+                        <div id="vulnchart_${key}"></div>
+                    </j:when>
+                </j:choose>
+            </j:forEach>
             <div name="input">
-                <input type="button" onclick="window.open(generateURL(),'_blank');" value="RHDA Report (Details)" />
+                <input type="button" onclick="downloadReport();" value="Download RHDA Report (Details)"/>
             </div>
             <script>
-                function generateURL(){
-					var currentUrl = window.location.pathname;
-					const pathArray = currentUrl.split("/");
-					var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length-2] + "/") + 1;
-					var baseUrl = currentUrl.substring(0, splitLoc);
-					var url = `${it.jobtype}`
-					if (url === "pipeline") {
-						return baseUrl + "lastSuccessfulBuild/artifact/dependency-analytics-report.html";
-					}
-                    else{
-						return baseUrl + "artifact/dependency-analytics-report.html";
-					}
+                function downloadReport() {
+                    // Get the download URL
+                    var downloadURL = generateURL();
+                    // Create a temporary anchor element
+                    var downloadLink = document.createElement("a");
+                    // Set the download link attributes
+                    downloadLink.href = downloadURL;
+                    downloadLink.download = "Dependency-Analytics-Report.html.html";
+                    // Append the anchor element to the body
+                    document.body.appendChild(downloadLink);
+                    // Trigger a click event on the anchor element
+                    downloadLink.click();
+                    // Remove the anchor element from the body
+                    document.body.removeChild(downloadLink);
+                }
+
+                function generateURL() {
+                    var currentUrl = window.location.pathname;
+                    const pathArray = currentUrl.split("/");
+                    var splitLoc = currentUrl.indexOf("/" + pathArray[pathArray.length - 2] + "/") + 1;
+                    var baseUrl = currentUrl.substring(0, splitLoc);
+                    var url = `${it.jobtype}`
+                    if (url === "pipeline") {
+                        return baseUrl + "lastSuccessfulBuild/artifact/dependency-analytics-report.html";
+                    } else {
+                        return baseUrl + "artifact/dependency-analytics-report.html";
+                    }
                 }
             </script>
         </l:main-panel>
