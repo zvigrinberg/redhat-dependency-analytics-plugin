@@ -9,12 +9,11 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>redhat-dependency-analytics</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>${revision}.${changelist}</version>
     <packaging>hpi</packaging>
     <properties>
-        <revision>0.1.0</revision>
-        <changelist>-SNAPSHOT</changelist>
-        <java.level>11</java.level>
+        <revision>0.9.1</revision>
+        <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <jenkins.version>2.387.3</jenkins.version>
     </properties>
