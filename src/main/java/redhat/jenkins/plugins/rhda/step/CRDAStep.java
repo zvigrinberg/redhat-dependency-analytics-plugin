@@ -250,27 +250,27 @@ public final class CRDAStep extends Step {
         private void processReport(AnalysisReport report, TaskListener listener) throws ExecutionException, InterruptedException {
             PrintStream logger = listener.getLogger();
             logger.println("Dependencies");
-            logger.println("  Total Scanned: " + report.getScanned().getTotal());
-            logger.println("  Total Direct: " + report.getScanned().getDirect());
-            logger.println("  Total Transitive: " + report.getScanned().getTransitive());
+            logger.println("  Total Scanned     : " + report.getScanned().getTotal());
+            logger.println("  Total Direct      : " + report.getScanned().getDirect());
+            logger.println("  Total Transitive  : " + report.getScanned().getTransitive());
             Map<String, ProviderReport> providers = report.getProviders();
             providers.forEach((key, value) -> {
                 if (!key.equalsIgnoreCase("trusted-content")) {
                     logger.println("");
-                    logger.println("Provider: " + key);
-                    logger.println("  Provider Status: " + value.getStatus().getMessage());
+                    logger.println("Provider: " + key.substring(0, 1).toUpperCase() + key.substring(1));
+                    logger.println("  Provider Status   : " + value.getStatus().getMessage());
                     if (value.getStatus().getCode() == 200) {
                         value.getSources().forEach((s, source) -> {
-                            logger.println("  Source: " + s);
+                            logger.println("  Source: " + s.substring(0, 1).toUpperCase() + s.substring(1));
                             if (value.getSources() != null) {
                                 logger.println("    Vulnerabilities");
-                                logger.println("      Total: " + source.getSummary().getTotal());
-                                logger.println("      Direct: " + source.getSummary().getDirect());
-                                logger.println("      Transitive: " + source.getSummary().getTransitive());
-                                logger.println("      Critical: " + source.getSummary().getCritical());
-                                logger.println("      High: " + source.getSummary().getHigh());
-                                logger.println("      Medium: " + source.getSummary().getMedium());
-                                logger.println("      Low: " + source.getSummary().getLow());
+                                logger.println("      Total         : " + source.getSummary().getTotal());
+                                logger.println("      Direct        : " + source.getSummary().getDirect());
+                                logger.println("      Transitive    : " + source.getSummary().getTransitive());
+                                logger.println("      Critical      : " + source.getSummary().getCritical());
+                                logger.println("      High          : " + source.getSummary().getHigh());
+                                logger.println("      Medium        : " + source.getSummary().getMedium());
+                                logger.println("      Low           : " + source.getSummary().getLow());
                                 logger.println("");
                             }
                         });
