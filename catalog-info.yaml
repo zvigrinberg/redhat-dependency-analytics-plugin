@@ -9,8 +9,10 @@ metadata:
     backstage.io/edit-url: https://github.com/jenkinsci/redhat-dependency-analytics-plugin/blob/main/catalog-info.yaml
     backstage.io/source-location: url:https://github.com/jenkinsci/redhat-dependency-analytics-plugin
     rhda/manifest-file-path: pom.xml
-    backstage.io/techdocs-ref: dir:README.md
+    backstage.io/techdocs-ref: url:https://github.com/jenkinsci/redhat-dependency-analytics-plugin
   name: redhat-dependency-analytics-plugin
+  tags:
+    - rhda
 spec:
   lifecycle: production
   owner: ecosystem-appeng
