@@ -128,6 +128,12 @@ public final class CRDAStep extends Step {
                 else{
                     System.clearProperty("EXHORT_URL");
                 }
+                if(envVars.get("EXHORT_DEV_MODE") != null ){
+                    System.setProperty("EXHORT_DEV_MODE", envVars.get("EXHORT_DEV_MODE"));
+                }
+                else{
+                    System.clearProperty("EXHORT_DEV_MODE");
+                }
 
                 if(envVars.get("EXHORT_SNYK_TOKEN") != null ){
                     System.setProperty("EXHORT_SNYK_TOKEN", envVars.get("EXHORT_SNYK_TOKEN"));
