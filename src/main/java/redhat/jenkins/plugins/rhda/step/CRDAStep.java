@@ -49,6 +49,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public final class CRDAStep extends Step {
     private String file;
@@ -99,7 +100,6 @@ public final class CRDAStep extends Step {
             try {
             	EnvVars envVars = context.get(EnvVars.class);
             	jenkinsPath = envVars.get("PATH");
-
                 // setting system properties to pass to java-api
                 if(envVars.get("EXHORT_MVN_PATH") != null ){
                     System.setProperty("EXHORT_MVN_PATH", envVars.get("EXHORT_MVN_PATH"));
@@ -127,6 +127,12 @@ public final class CRDAStep extends Step {
                 }
                 else{
                     System.clearProperty("EXHORT_URL");
+                }
+                if(envVars.get("EXHORT_DEV_MODE") != null ){
+                    System.setProperty("EXHORT_DEV_MODE", envVars.get("EXHORT_DEV_MODE"));
+                }
+                else{
+                    System.clearProperty("EXHORT_DEV_MODE");
                 }
 
                 if(envVars.get("EXHORT_SNYK_TOKEN") != null ){
@@ -176,6 +182,24 @@ public final class CRDAStep extends Step {
                 }
                 else{
                     System.clearProperty("EXHORT_OSS_INDEX_TOKEN");
+                }
+                if(envVars.get("EXHORT_PIP_SHOW") != null ){
+                    System.setProperty("EXHORT_PIP_SHOW", envVars.get("EXHORT_PIP_SHOW"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PIP_SHOW");
+                }
+                if(envVars.get("EXHORT_PIP_FREEZE") != null ){
+                    System.setProperty("EXHORT_PIP_FREEZE", envVars.get("EXHORT_PIP_FREEZE"));
+                }
+                else{
+                    System.clearProperty("EXHORT_PIP_FREEZE");
+                }
+                if(envVars.get("EXHORT_DEBUG") != null ){
+                    System.setProperty("EXHORT_DEBUG", envVars.get("EXHORT_DEBUG"));
+                }
+                else{
+                    System.clearProperty("EXHORT_DEBUG");
                 }
 
                 String crdaUuid;
