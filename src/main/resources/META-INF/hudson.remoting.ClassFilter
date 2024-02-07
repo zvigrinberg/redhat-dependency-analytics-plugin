@@ -1,0 +1,15 @@
+com.redhat.exhort.api.AnalysisReport
+com.redhat.exhort.api.Scanned
+com.redhat.exhort.api.ProviderReport
+com.redhat.exhort.api.ProviderStatus
+com.redhat.exhort.api.Source
+com.redhat.exhort.api.SourceSummary
+com.redhat.exhort.api.DependencyReport
+com.redhat.exhort.api.PackageRef
+com.redhat.exhort.api.TransitiveDependencyReport
+com.redhat.exhort.api.Issue
+com.redhat.exhort.api.Remediation
+com.redhat.exhort.api.RemediationTrustedContent
+com.github.packageurl.PackageURL
+com.redhat.exhort.api.CvssVector
+com.redhat.exhort.api.Severity
