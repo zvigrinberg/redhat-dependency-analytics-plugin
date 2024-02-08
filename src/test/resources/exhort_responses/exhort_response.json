@@ -1,0 +1,473 @@
+{
+  "scanned" : {
+    "total" : 20,
+    "direct" : 20,
+    "transitive" : 0
+  },
+  "providers" : {
+    "trusted-content" : {
+      "status" : {
+        "ok" : true,
+        "name" : "trusted-content",
+        "code" : 200,
+        "message" : "OK"
+      }
+    },
+    "osv-nvd" : {
+      "status" : {
+        "ok" : true,
+        "name" : "osv-nvd",
+        "code" : 200,
+        "message" : "OK"
+      },
+      "sources" : {
+        "osv-nvd" : {
+          "summary" : {
+            "direct" : 7,
+            "transitive" : 0,
+            "total" : 7,
+            "dependencies" : 3,
+            "critical" : 2,
+            "high" : 4,
+            "medium" : 1,
+            "low" : 0,
+            "remediations" : 0,
+            "recommendations" : 0
+          },
+          "dependencies" : [ {
+            "ref" : "pkg:pypi/certifi@2020.6.20",
+            "issues" : [ {
+              "id" : "CVE-2023-37920",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              "cvssScore" : 9.8,
+              "severity" : "CRITICAL",
+              "cves" : [ "CVE-2023-37920" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2023.7.22" ]
+              }
+            }, {
+              "id" : "CVE-2023-37920",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              "cvssScore" : 9.8,
+              "severity" : "CRITICAL",
+              "cves" : [ "CVE-2023-37920" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2023.7.22" ]
+              }
+            }, {
+              "id" : "CVE-2022-23491",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2022-23491" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2022.12.7" ]
+              }
+            }, {
+              "id" : "CVE-2022-23491",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2022-23491" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2022.12.7" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "CVE-2023-37920",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              "cvssScore" : 9.8,
+              "severity" : "CRITICAL",
+              "cves" : [ "CVE-2023-37920" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2023.7.22" ]
+              }
+            }
+          }, {
+            "ref" : "pkg:pypi/flask@1.1.2",
+            "issues" : [ {
+              "id" : "CVE-2023-30861",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2023-30861" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "70f906c51ce49c485f1d355703e9cc3386b1cc2b", "afd63b16170b7c047f5758eb910c416511e9c965", "2.2.5", "2.3.2" ]
+              }
+            }, {
+              "id" : "CVE-2023-30861",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2023-30861" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "70f906c51ce49c485f1d355703e9cc3386b1cc2b", "afd63b16170b7c047f5758eb910c416511e9c965", "2.2.5", "2.3.2" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "CVE-2023-30861",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2023-30861" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "70f906c51ce49c485f1d355703e9cc3386b1cc2b", "afd63b16170b7c047f5758eb910c416511e9c965", "2.2.5", "2.3.2" ]
+              }
+            }
+          }, {
+            "ref" : "pkg:pypi/pypdf2@1.27.5",
+            "issues" : [ {
+              "id" : "CVE-2023-36810",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "Required",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+              },
+              "cvssScore" : 6.5,
+              "severity" : "MEDIUM",
+              "cves" : [ "CVE-2023-36810" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "1.27.9" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "CVE-2023-36810",
+              "source" : "osv-nvd",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "Required",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+              },
+              "cvssScore" : 6.5,
+              "severity" : "MEDIUM",
+              "cves" : [ "CVE-2023-36810" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "1.27.9" ]
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "snyk" : {
+      "status" : {
+        "ok" : true,
+        "name" : "snyk",
+        "code" : 200,
+        "message" : "OK"
+      },
+      "sources" : {
+        "snyk" : {
+          "summary" : {
+            "direct" : 6,
+            "transitive" : 0,
+            "total" : 6,
+            "dependencies" : 3,
+            "critical" : 1,
+            "high" : 2,
+            "medium" : 3,
+            "low" : 0,
+            "remediations" : 0,
+            "recommendations" : 0
+          },
+          "dependencies" : [ {
+            "ref" : "pkg:pypi/certifi@2020.6.20",
+            "issues" : [ {
+              "id" : "SNYK-PYTHON-CERTIFI-5805047",
+              "title" : "Improper Following of a Certificate's Chain of Trust",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              "cvssScore" : 9.8,
+              "severity" : "CRITICAL",
+              "cves" : [ "CVE-2023-37920" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2023.7.22" ]
+              }
+            }, {
+              "id" : "SNYK-PYTHON-CERTIFI-3164749",
+              "title" : "Insufficient Verification of Data Authenticity",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "High",
+                "userInteraction" : "None",
+                "scope" : "Changed",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:N/I:H/A:N"
+              },
+              "cvssScore" : 6.8,
+              "severity" : "MEDIUM",
+              "cves" : [ "CVE-2022-23491" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2022.12.7" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "SNYK-PYTHON-CERTIFI-5805047",
+              "title" : "Improper Following of a Certificate's Chain of Trust",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "High",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              "cvssScore" : 9.8,
+              "severity" : "CRITICAL",
+              "cves" : [ "CVE-2023-37920" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2023.7.22" ]
+              }
+            }
+          }, {
+            "ref" : "pkg:pypi/pypdf2@1.27.5",
+            "issues" : [ {
+              "id" : "SNYK-PRIVATE-VULNERABILITY",
+              "title" : "Sign up for a Snyk account to learn about the vulnerabilities found",
+              "source" : "snyk",
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "unique" : true,
+              "remediation" : {
+                "fixedIn" : [ "2.10.6" ]
+              }
+            }, {
+              "id" : "SNYK-PYTHON-PYPDF2-5741898",
+              "title" : "Denial of Service (DoS)",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Local",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+              },
+              "cvssScore" : 6.2,
+              "severity" : "MEDIUM",
+              "cves" : [ "CVE-2023-36464" ],
+              "unique" : false,
+              "remediation" : { }
+            }, {
+              "id" : "SNYK-PYTHON-PYPDF2-5750281",
+              "title" : "Inefficient Algorithmic Complexity",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Local",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "None",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "High",
+                "cvss" : "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+              },
+              "cvssScore" : 6.2,
+              "severity" : "MEDIUM",
+              "cves" : [ "CVE-2023-36810" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "1.27.9" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "SNYK-PRIVATE-VULNERABILITY",
+              "title" : "Sign up for a Snyk account to learn about the vulnerabilities found",
+              "source" : "snyk",
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "unique" : true,
+              "remediation" : {
+                "fixedIn" : [ "2.10.6" ]
+              }
+            }
+          }, {
+            "ref" : "pkg:pypi/flask@1.1.2",
+            "issues" : [ {
+              "id" : "SNYK-PYTHON-FLASK-5490129",
+              "title" : "Information Exposure",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2023-30861" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2.2.5", "2.3.2" ]
+              }
+            } ],
+            "highestVulnerability" : {
+              "id" : "SNYK-PYTHON-FLASK-5490129",
+              "title" : "Information Exposure",
+              "source" : "snyk",
+              "cvss" : {
+                "attackVector" : "Network",
+                "attackComplexity" : "Low",
+                "privilegesRequired" : "None",
+                "userInteraction" : "None",
+                "scope" : "Unchanged",
+                "confidentialityImpact" : "High",
+                "integrityImpact" : "None",
+                "availabilityImpact" : "None",
+                "cvss" : "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+              },
+              "cvssScore" : 7.5,
+              "severity" : "HIGH",
+              "cves" : [ "CVE-2023-30861" ],
+              "unique" : false,
+              "remediation" : {
+                "fixedIn" : [ "2.2.5", "2.3.2" ]
+              }
+            }
+          } ]
+        }
+      }
+    }
+  }
+}
