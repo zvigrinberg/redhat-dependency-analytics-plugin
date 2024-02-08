@@ -7,8 +7,13 @@
   - [Admin Steps](#admin-steps)
     - [Install The Plugin](#1-install-the-redhat-dependency-analytics-jenkins-plugin)
     - [Configuration](#2-configuration)
+      - [Customization](#customization)  
+      - [General Configuration](#general-configuration)  
+      - [Python Pipeline Configuration](#python-pipeline-configuration)  
+    - [Invoking The Plugin](#using-the-plugin)
       - [1. Build Step](#option-i--as-a-build-step)
       - [2. Pipeline Task](#option-ii--as-a-pipeline-task)
+      - [Return Code](#return-code-from-plugin)
 - [Results](#results)
   - [1. Console Output](#1-console-output)
   - [2. RHDA Stack Report](#2-rhda-stack-report)
@@ -38,9 +43,10 @@ The plugin can be used in Jenkins as a pipeline task or as a build step.
 
 ### 2. Configuration
 Make sure that the Path is updated to point to the corresponding executables, like `mvn`, `pip` etc.
-<h5>Customization</h5>
-<p>
-There is a way to set a custom Maven path using <em>Environment Variables</em>. 
+
+#### Customization
+
+There is a way to set a custom Package Managers paths using <em>Environment Variables</em>. 
 
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
 - Set the corresponding custom path based on your project: 
@@ -59,7 +65,7 @@ If you have a Snyk token, add that as an environment variable:
 
 #### General Configuration
  Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables, And there you can set the following settings:
- - name: _EXHORT_DEBUG_, Value: true , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is is false.
+ - name: _EXHORT_DEBUG_, Value: true , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is false.
 
 
  - name: _EXHORT_DEV_MODE_, value: true, Description: Will invoke the Analysis on Staging Instance Of EXHORT Service, Default: false ( EXHORT Production Instance)
@@ -136,7 +142,7 @@ node {
  
  
 
-
+### Using The Plugin
 
 #### Option I- As a build step
 - Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
@@ -161,6 +167,7 @@ node {
 The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
   ![](./images/pipeline.png)
+#### Return Code From Plugin
 - It returns 3 different exit status code
     - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with Severity that exceeded the highest severity Allowed  in the dependency stack.
     - 1: ERROR -   Analysis encountered an error.
