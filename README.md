@@ -56,6 +56,88 @@ If you have a Snyk token, add that as an environment variable:
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
 - Set the variable name to _EXHORT_SNYK_TOKEN_, and copy-and-paste your Snyk token into the value field.
 
+
+#### General Configuration
+ Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables, And there you can set the following settings:
+ - name: _EXHORT_DEBUG_, Value: true , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is is false.
+
+
+ - name: _EXHORT_DEV_MODE_, value: true, Description: Will invoke the Analysis on Staging Instance Of EXHORT Service, Default: false ( EXHORT Production Instance)
+
+
+ - name: _HIGHEST_ALLOWED_VULN_SEVERITY_, Possible values: [`LOW`,`MEDIUM`,`HIGH`,`CRITICAL`], Description: will determine what is the highest allowed Severity of a vulnerability found for a given package/dependency in the analysis, for the analysis to be considered Successful(RC=0) and not Vulnerable(RC=2), Default value is `MEDIUM`
+
+#### Python Pipeline Configuration
+ For python PIP Packages, you can bypass using the python and pip binaries during the invocation of the analysis, and just use them elsewhere in the pipeline job (another stage, or even another agent/node),
+ The Idea is to bring maximum flexibility with the python and pip versions, so you won't enforce the user to install sometimes a different python and pip versions just to adapt it to the exact requirements.txt' packages' versions, as python pip is very sensitive to versioning (for each python and pip version , there is only a limited range of supported versions for every package).
+ There are two environment variables:
+  1. _EXHORT_PIP_FREEZE_
+  2. _EXHORT_PIP_SHOW_ 
+ 
+
+ This feature enable you to use python on different agent ( for example, container image of python containing the desired python version), install the input requirements.txt using pip in the container image, and then invoke `pip freeze --all` and `pip show [List_Of_Packages]`, and save the output of these to a workspace files,
+ And then set the above variables with these output after encoding them using base64 encoding.
+
+Example Pipeline With proper usage:
+
+```yaml
+node {
+    def dockerArguments= '--user=root'
+    def pipFreezeOutput
+    def pipShowOutput
+    def pythonImage = "python:${params.PYTHON_VERSION}-slim"
+    def gitRepoWithRequirements = "${params.REQUIREMENTS_GIT_REPO}"
+    def gitRepoWithRequirementsBranch = "${params.REQUIREMENTS_GIT_BRANCH}"
+
+
+    stage('Checkout Git Repo') { // for display purposes
+        // Get some code from a GitHub repository
+        dir('requirementsDir') {
+            git  branch: gitRepoWithRequirementsBranch, url: gitRepoWithRequirements
+        }
+
+    }
+
+    stage('Install Python Package') {
+        docker.withTool('docker-tool') {
+            docker.withServer('tcp://localhost:2376','docker-server-certs'){
+
+                docker.image(pythonImage).inside(dockerArguments) {
+                    sh 'pip install -r requirementsDir/requirements.txt'
+                    pipFreezeOutput = sh(script: "pip freeze --all" ,returnStdout: true ).trim()
+                    writeFile([file: 'pip-freeze.txt', text: pipFreezeOutput])
+                    pipFreezeOutput = sh(script: "pip freeze --all | awk -F \"==\" '{print \$1}' | tr \"\n\" \" \"" ,returnStdout: true ).trim()
+                    pipShowOutput = sh(script:"pip show ${pipFreezeOutput}" ,returnStdout: true )
+                    writeFile([file: 'pip-show.txt', text: pipShowOutput])
+
+
+                }
+            }
+        }
+    }
+    stage('RHDA Run Analysis') {
+        def pipFreezeB64= sh(script: 'cat pip-freeze.txt | base64 -w0' ,returnStdout: true ).trim()
+        def pipShowB64= sh(script: 'cat pip-show.txt | base64 -w0',returnStdout: true ).trim()
+        echo "pipFreezeB64= ${pipFreezeB64}"
+        echo "pipShowpipShowB64= ${pipShowB64}"
+        withEnv(["EXHORT_PIP_FREEZE=${pipFreezeB64}","EXHORT_PIP_SHOW=${pipShowB64}"]) {
+
+            rhdaAnalysis consentTelemetry: true, file: "${WORKSPACE}/requirementsDir/requirements.txt"
+        }
+
+    }
+
+    stage('Clean Workspace') {
+        cleanWs cleanWhenAborted: false, cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+    }
+
+}
+```
+ 
+ 
+
+
+
 #### Option I- As a build step
 - Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
 - Filepath (Mandatory): Provide the filepath for the manifest file. We currently support the following
@@ -80,9 +162,9 @@ The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
   ![](./images/pipeline.png)
 - It returns 3 different exit status code
-    - 0: Analysis is successful and there were no vulnerabilities found in the dependency stack.
-    - 1: Analysis encountered an error.
-    - 2: Analysis is successful and it found 1 or more vulnerabilities in the dependency stack.
+    - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with Severity that exceeded the highest severity Allowed  in the dependency stack.
+    - 1: ERROR -   Analysis encountered an error.
+    - 2: VULNERABLE - Analysis is successful, but it found 1 or more vulnerabilities that Their Severity Exceeds the Highest Severity Allowed in the dependency stack.
 
 ## Results
 There are a total 3 ways to view the results of the analysis.
