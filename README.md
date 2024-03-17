@@ -46,7 +46,7 @@ Make sure that the Path is updated to point to the corresponding executables, li
 
 #### Customization
 
-There is a way to set a custom Package Managers paths using <em>Environment Variables</em>. 
+To set a custom path for package managers use environment variables.
 
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
 - Set the corresponding custom path based on your project: 
@@ -64,7 +64,7 @@ If you have a Snyk token, add that as an environment variable:
 
 
 #### General Configuration
- Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables, And there you can set the following settings:
+ Click <em>Manage Jenkins</em>. Click <em>System</em>, and scroll down to <em>Global properties/Environment Variables</em>. Here you can configure the following settings:
  - name: _EXHORT_DEBUG_, Value: true , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is false.
 
 
@@ -74,8 +74,7 @@ If you have a Snyk token, add that as an environment variable:
  - name: _HIGHEST_ALLOWED_VULN_SEVERITY_, Possible values: [`LOW`,`MEDIUM`,`HIGH`,`CRITICAL`], Description: will determine what is the highest allowed Severity of a vulnerability found for a given package/dependency in the analysis, for the analysis to be considered Successful(RC=0) and not Vulnerable(RC=2), Default value is `MEDIUM`
 
 #### Python Pipeline Configuration
- For python PIP Packages, you can bypass using the python and pip binaries during the invocation of the analysis, and just use them elsewhere in the pipeline job (another stage, or even another agent/node),
- The Idea is to bring maximum flexibility with the python and pip versions, so you won't enforce the user to install sometimes a different python and pip versions just to adapt it to the exact requirements.txt' packages' versions, as python pip is very sensitive to versioning (for each python and pip version , there is only a limited range of supported versions for every package).
+ For Python PIP packages, you can bypass using the Python and PIP binaries during the invocation of the analysis. You can also use them elsewhere in your pipeline jobs, such as another stage, or another agent or node. The Idea is to bring maximum flexibility with the python and pip versions, so you won't enforce the user to install sometimes a different python and pip versions just to adapt it to the exact requirements.txt' packages' versions, as python pip is very sensitive to versioning (for each python and pip version , there is only a limited range of supported versions for every package).
  There are two environment variables:
   1. _EXHORT_PIP_FREEZE_
   2. _EXHORT_PIP_SHOW_ 
@@ -84,7 +83,7 @@ If you have a Snyk token, add that as an environment variable:
  This feature enable you to use python on different agent ( for example, container image of python containing the desired python version), install the input requirements.txt using pip in the container image, and then invoke `pip freeze --all` and `pip show [List_Of_Packages]`, and save the output of these to a workspace files,
  And then set the above variables with these output after encoding them using base64 encoding.
 
-Example Pipeline With proper usage:
+Example pipeline with proper usage:
 
 ```yaml
 node {
