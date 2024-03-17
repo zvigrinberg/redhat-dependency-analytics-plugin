@@ -143,7 +143,7 @@ node {
 
 ### Using The Plugin
 
-#### Option I- As a build step
+#### Option 1 - As a build step
 - Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
 - Filepath (Mandatory): Provide the filepath for the manifest file. We currently support the following
 	- Maven: pom.xml
@@ -160,7 +160,7 @@ node {
      For example, a value of `$JENKINS_HOME/tools/hudson.tasks.Maven_MavenInstallation/<Maven Name from Step 1>/bin/mvn`.
   4. Include **Invoke top-level maven targets** as a build step by specifying the Maven version, and add **clean install** as a goal for the new pipeline item.
   
-#### Option II- As a pipeline task
+#### Option 2 - As a pipeline task
 - Its just a single line that you need to add in your pipeline script.
 `rhdaAnalysis file:'manifest file path', consentTelemetry:true`
 The value description remains the same as provided in the Option I.
