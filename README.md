@@ -166,6 +166,42 @@ node {
 The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
   ![](./images/pipeline.png)
+
+
+##### Example basic pipeline
+**Note: This basic declarative pipeline assumes that package managers binaries preinstalled in the pipeline' invoking machine (jenkins master or jenkins agent) **
+```java
+
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the Git repository
+                checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: '[https://github.com/Your github project link.git']]](https://github.com/Your github project link.git)])
+            }
+        }
+        stage ('Install requirements.txt if Python PIP') {
+            steps {
+                script {
+                    if (fileExists('requirements.txt')) {
+                        sh 'pip install -r requirements.txt'
+                    }
+                }
+            }
+        }
+        stage('RHDA Step') {
+            steps {
+                echo 'RHDA'
+                rhdaAnalysis consentTelemetry: true, file: 'manifestName.extension'
+            }
+        }
+    }
+}
+
+
+```
+
 #### Return Code From Plugin
 - It returns 3 different exit status code
     - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with Severity that exceeded the highest severity Allowed  in the dependency stack.
