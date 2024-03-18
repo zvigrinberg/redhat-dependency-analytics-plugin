@@ -74,7 +74,7 @@ If you have a Snyk token, add that as an environment variable:
  - name: _HIGHEST_ALLOWED_VULN_SEVERITY_, Possible values: [`LOW`,`MEDIUM`,`HIGH`,`CRITICAL`], Description: will determine what is the highest allowed Severity of a vulnerability found for a given package/dependency in the analysis, for the analysis to be considered Successful(RC=0) and not Vulnerable(RC=2), Default value is `MEDIUM`
 
 #### Python Pipeline Configuration
- For Python PIP packages, you can bypass using the Python and PIP binaries during the invocation of the analysis. You can also use them elsewhere in your pipeline jobs, such as another stage, or another agent or node. The Idea is to bring maximum flexibility with the python and pip versions, so you won't enforce the user to install sometimes a different python and pip versions just to adapt it to the exact requirements.txt' packages' versions, as python pip is very sensitive to versioning (for each python and pip version , there is only a limited range of supported versions for every package).
+ For Python PIP packages, you can use the specific Python and PIP binaries during the invocation of the analysis. You can also specify these binaries elsewhere in your pipeline jobs, such as a stage environment, or another agent or node. Red Hat Dependency Analytics gives you maximum flexibility with the Python and PIP versions. You do not have to enforce the user to install different Python and PIP versions just to adapt it to the exact `requirements.txt` list of package versions. Python is very sensitive to versioning, for each Python version, there is a limited range of supported versions for a package.
  There are two environment variables:
   1. _EXHORT_PIP_FREEZE_
   2. _EXHORT_PIP_SHOW_ 
