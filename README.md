@@ -65,10 +65,10 @@ If you have a Snyk token, add that as an environment variable:
 
 #### General Configuration
  Click <em>Manage Jenkins</em>. Click <em>System</em>, and scroll down to <em>Global properties/Environment Variables</em>. Here you can configure the following settings:
- - name: _EXHORT_DEBUG_, Value: true , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is false.
+ - name: `EXHORT_DEBUG`, Value: `true` , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is false.
 
 
- - name: _EXHORT_DEV_MODE_, value: true, Description: Will invoke the Analysis on Staging Instance Of EXHORT Service, Default: false ( EXHORT Production Instance)
+ - name: `EXHORT_DEV_MODE`, value: `true`, Description: Will invoke the Analysis on Staging Instance Of EXHORT Service, Default: false ( EXHORT Production Instance)
 
 
  - name: _HIGHEST_ALLOWED_VULN_SEVERITY_, Possible values: [`LOW`,`MEDIUM`,`HIGH`,`CRITICAL`], Description: will determine what is the highest allowed Severity of a vulnerability found for a given package/dependency in the analysis, for the analysis to be considered Successful(RC=0) and not Vulnerable(RC=2), Default value is `MEDIUM`
@@ -80,9 +80,7 @@ If you have a Snyk token, add that as an environment variable:
   2. _EXHORT_PIP_SHOW_ 
  
 
- This feature enable you to use python on different agent ( for example, container image of python containing the desired python version), install the input requirements.txt using pip in the container image, and then invoke `pip freeze --all` and `pip show [List_Of_Packages]`, and save the output of these to a workspace files,
- And then set the above variables with these output after encoding them using base64 encoding.
-
+ This feature enables you to use Python for different agents. For example, a Python container image containing the desired Python version you want to do the analysis with. You can install the input requirements.txt file using PIP within the container image, and then you can use the following commands to generate the output for a files in workspace : pip freeze --all and pip show <list_of_packages>. Next, run base64 to encode the output from these commands, and set the EXHORT_PIP_FREEZE and EXHORT_PIP_SHOW environment variables with that encoded output, respectively.
 Example pipeline with proper usage:
 
 ```yaml
@@ -169,7 +167,7 @@ User can also use the pipeline snippet generator to generate the command.
 
 
 ##### Example basic pipeline
-**Note: This basic declarative pipeline assumes that package managers binaries preinstalled in the pipeline' invoking machine (jenkins master or jenkins agent) **
+**NOTE: The package manager binaries have to be in the pipeline's invoking machine, such as a Jenkins master or agent, for this declarative pipeline to work properly.**
 ```java
 
 pipeline {
@@ -204,7 +202,7 @@ pipeline {
 
 #### Return Code From Plugin
 - It returns 3 different exit status code
-    - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with Severity that exceeded the highest severity Allowed  in the dependency stack.
+    - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with a severity that exceeded the highest severity allowed in the dependency stack.
     - 1: ERROR -   Analysis encountered an error.
     - 2: VULNERABLE - Analysis is successful, but it found 1 or more vulnerabilities that Their Severity Exceeds the Highest Severity Allowed in the dependency stack.
 
