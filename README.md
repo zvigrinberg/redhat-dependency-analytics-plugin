@@ -7,8 +7,13 @@
   - [Admin Steps](#admin-steps)
     - [Install The Plugin](#1-install-the-redhat-dependency-analytics-jenkins-plugin)
     - [Configuration](#2-configuration)
+      - [Customization](#customization)  
+      - [General Configuration](#general-configuration)  
+      - [Python pipeline Configuration](#python-pipeline-configuration)  
+    - [Using The Plugin](#using-the-plugin)
       - [1. Build Step](#option-i--as-a-build-step)
       - [2. Pipeline Task](#option-ii--as-a-pipeline-task)
+      - [Return Code](#return-code-from-plugin)
 - [Results](#results)
   - [1. Console Output](#1-console-output)
   - [2. RHDA Stack Report](#2-rhda-stack-report)
@@ -38,9 +43,10 @@ The plugin can be used in Jenkins as a pipeline task or as a build step.
 
 ### 2. Configuration
 Make sure that the Path is updated to point to the corresponding executables, like `mvn`, `pip` etc.
-<h5>Customization</h5>
-<p>
-There is a way to set a custom Maven path using <em>Environment Variables</em>. 
+
+#### Customization
+
+To set a custom path for package managers use environment variables.
 
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
 - Set the corresponding custom path based on your project: 
@@ -56,7 +62,86 @@ If you have a Snyk token, add that as an environment variable:
 - Click on Manage Jenkins -> System, scroll down to Global properties/Environment Variables.
 - Set the variable name to _EXHORT_SNYK_TOKEN_, and copy-and-paste your Snyk token into the value field.
 
-#### Option I- As a build step
+
+#### General Configuration
+ Click <em>Manage Jenkins</em>. Click <em>System</em>, and scroll down to <em>Global properties/Environment Variables</em>. Here you can configure the following settings:
+ - name: `EXHORT_DEBUG`, Value: `true` , Description: Will invoke the analysis in verbose mode and will print a lot of useful logs to job output console - good for debugging, Default value is false.
+
+
+ - name: `EXHORT_DEV_MODE`, value: `true`, Description: Will invoke the Analysis on Staging Instance Of EXHORT Service, Default: false ( EXHORT Production Instance)
+
+
+ - name: _HIGHEST_ALLOWED_VULN_SEVERITY_, Possible values: [`LOW`,`MEDIUM`,`HIGH`,`CRITICAL`], Description: will determine what is the highest allowed Severity of a vulnerability found for a given package/dependency in the analysis, for the analysis to be considered Successful(RC=0) and not Vulnerable(RC=2), Default value is `MEDIUM`
+
+#### Python Pipeline Configuration
+ For Python PIP packages, you can use the specific Python and PIP binaries during the invocation of the analysis. You can also specify these binaries elsewhere in your pipeline jobs, such as a stage environment, or another agent or node. Red Hat Dependency Analytics gives you maximum flexibility with the Python and PIP versions. You do not have to enforce the user to install different Python and PIP versions just to adapt it to the exact `requirements.txt` list of package versions. Python is very sensitive to versioning, for each Python version, there is a limited range of supported versions for a package.
+ There are two environment variables:
+  1. _EXHORT_PIP_FREEZE_
+  2. _EXHORT_PIP_SHOW_ 
+ 
+
+ This feature enables you to use Python for different agents. For example, a Python container image containing the desired Python version you want to do the analysis with. You can install the input requirements.txt file using PIP within the container image, and then you can use the following commands to generate the output for a files in workspace : pip freeze --all and pip show <list_of_packages>. Next, run base64 to encode the output from these commands, and set the EXHORT_PIP_FREEZE and EXHORT_PIP_SHOW environment variables with that encoded output, respectively.
+Example pipeline with proper usage:
+
+```yaml
+node {
+    def dockerArguments= '--user=root'
+    def pipFreezeOutput
+    def pipShowOutput
+    def pythonImage = "python:${params.PYTHON_VERSION}-slim"
+    def gitRepoWithRequirements = "${params.REQUIREMENTS_GIT_REPO}"
+    def gitRepoWithRequirementsBranch = "${params.REQUIREMENTS_GIT_BRANCH}"
+
+
+    stage('Checkout Git Repo') { // for display purposes
+        // Get some code from a GitHub repository
+        dir('requirementsDir') {
+            git  branch: gitRepoWithRequirementsBranch, url: gitRepoWithRequirements
+        }
+
+    }
+
+    stage('Install Python Package') {
+        docker.withTool('docker-tool') {
+            docker.withServer('tcp://localhost:2376','docker-server-certs'){
+
+                docker.image(pythonImage).inside(dockerArguments) {
+                    sh 'pip install -r requirementsDir/requirements.txt'
+                    pipFreezeOutput = sh(script: "pip freeze --all" ,returnStdout: true ).trim()
+                    writeFile([file: 'pip-freeze.txt', text: pipFreezeOutput])
+                    pipFreezeOutput = sh(script: "pip freeze --all | awk -F \"==\" '{print \$1}' | tr \"\n\" \" \"" ,returnStdout: true ).trim()
+                    pipShowOutput = sh(script:"pip show ${pipFreezeOutput}" ,returnStdout: true )
+                    writeFile([file: 'pip-show.txt', text: pipShowOutput])
+
+
+                }
+            }
+        }
+    }
+    stage('RHDA Run Analysis') {
+        def pipFreezeB64= sh(script: 'cat pip-freeze.txt | base64 -w0' ,returnStdout: true ).trim()
+        def pipShowB64= sh(script: 'cat pip-show.txt | base64 -w0',returnStdout: true ).trim()
+        echo "pipFreezeB64= ${pipFreezeB64}"
+        echo "pipShowpipShowB64= ${pipShowB64}"
+        withEnv(["EXHORT_PIP_FREEZE=${pipFreezeB64}","EXHORT_PIP_SHOW=${pipShowB64}"]) {
+
+            rhdaAnalysis consentTelemetry: true, file: "${WORKSPACE}/requirementsDir/requirements.txt"
+        }
+
+    }
+
+    stage('Clean Workspace') {
+        cleanWs cleanWhenAborted: false, cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+    }
+
+}
+```
+ 
+ 
+
+### Using The Plugin
+
+#### Option 1 - As a build step
 - Click on Configure -> Build Trigger -> Add Build Step. Select `Invoke Red Hat Dependency Analytics (RHDA)`.
 - Filepath (Mandatory): Provide the filepath for the manifest file. We currently support the following
 	- Maven: pom.xml
@@ -73,16 +158,53 @@ If you have a Snyk token, add that as an environment variable:
      For example, a value of `$JENKINS_HOME/tools/hudson.tasks.Maven_MavenInstallation/<Maven Name from Step 1>/bin/mvn`.
   4. Include **Invoke top-level maven targets** as a build step by specifying the Maven version, and add **clean install** as a goal for the new pipeline item.
   
-#### Option II- As a pipeline task
+#### Option 2 - As a pipeline task
 - Its just a single line that you need to add in your pipeline script.
 `rhdaAnalysis file:'manifest file path', consentTelemetry:true`
 The value description remains the same as provided in the Option I.
 User can also use the pipeline snippet generator to generate the command.
   ![](./images/pipeline.png)
+
+
+##### Example basic pipeline
+**NOTE: The package manager binaries have to be in the pipeline's invoking machine, such as a Jenkins master or agent, for this declarative pipeline to work properly.**
+```java
+
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the Git repository
+                checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: '[https://github.com/Your github project link.git']]](https://github.com/Your github project link.git)])
+            }
+        }
+        stage ('Install requirements.txt if Python PIP') {
+            steps {
+                script {
+                    if (fileExists('requirements.txt')) {
+                        sh 'pip install -r requirements.txt'
+                    }
+                }
+            }
+        }
+        stage('RHDA Step') {
+            steps {
+                echo 'RHDA'
+                rhdaAnalysis consentTelemetry: true, file: 'manifestName.extension'
+            }
+        }
+    }
+}
+
+
+```
+
+#### Return Code From Plugin
 - It returns 3 different exit status code
-    - 0: Analysis is successful and there were no vulnerabilities found in the dependency stack.
-    - 1: Analysis encountered an error.
-    - 2: Analysis is successful and it found 1 or more vulnerabilities in the dependency stack.
+    - 0: SUCCESS - Analysis is successful and there were no vulnerabilities found with a severity that exceeded the highest severity allowed in the dependency stack.
+    - 1: ERROR -   Analysis encountered an error.
+    - 2: VULNERABLE - Analysis is successful, but it found 1 or more vulnerabilities that Their Severity Exceeds the Highest Severity Allowed in the dependency stack.
 
 ## Results
 There are a total 3 ways to view the results of the analysis.

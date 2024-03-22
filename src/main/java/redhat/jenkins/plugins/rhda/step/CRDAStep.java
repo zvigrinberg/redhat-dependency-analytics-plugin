@@ -17,8 +17,7 @@
 package redhat.jenkins.plugins.rhda.step;
 
 import com.redhat.exhort.Api;
-import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.api.ProviderReport;
+import com.redhat.exhort.api.*;
 import com.redhat.exhort.impl.ExhortApi;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -38,6 +37,7 @@ import redhat.jenkins.plugins.rhda.action.CRDAAction;
 import redhat.jenkins.plugins.rhda.task.CRDABuilder.BuilderDescriptorImpl;
 import redhat.jenkins.plugins.rhda.utils.Config;
 import redhat.jenkins.plugins.rhda.utils.RHDAGlobalConfig;
+import redhat.jenkins.plugins.rhda.utils.Utils;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -100,6 +100,7 @@ public final class CRDAStep extends Step {
             try {
             	EnvVars envVars = context.get(EnvVars.class);
             	jenkinsPath = envVars.get("PATH");
+
                 // setting system properties to pass to java-api
                 if(envVars.get("EXHORT_MVN_PATH") != null ){
                     System.setProperty("EXHORT_MVN_PATH", envVars.get("EXHORT_MVN_PATH"));
@@ -259,16 +260,22 @@ public final class CRDAStep extends Step {
                 logger.println("Click on the RHDA Stack Report icon to view the detailed report.");
                 logger.println("----- RHDA Analysis Ends -----");
                 run.addAction(new CRDAAction(System.getProperty("RHDA-TOKEN"), mixedStackReport.get().json, workspace + "/dependency-analysis-report.html", "pipeline"));
-
-//                return (mixedStackReport.get().json.getSummary().getVulnerabilities().getTotal()).intValue() == 0 ? Config.EXIT_SUCCESS : Config.EXIT_VULNERABLE;
-                return Config.EXIT_SUCCESS ;
+//                isHighestVulnerabilityAllowedExceeded
+                Set<Severity> allHighestSeverities = Utils.getAllHighestSeveritiesFromResponse(mixedStackReport.get().json);
+                var highestAllowedSeverity = getHighestAllowedSeverity( getContext().get(EnvVars.class).get("HIGHEST_ALLOWED_VULN_SEVERITY"));
+                if(Utils.isHighestVulnerabilityAllowedExceeded(allHighestSeverities, highestAllowedSeverity )) {
+                    return Config.EXIT_VULNERABLE;
+                }
+                else {
+                    return Config.EXIT_SUCCESS;
+                }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-            return Config.EXIT_VULNERABLE;
+            return Config.EXIT_FAILED;
         }
 
         private void processReport(AnalysisReport report, TaskListener listener) throws ExecutionException, InterruptedException {
@@ -312,6 +319,16 @@ public final class CRDAStep extends Step {
         }
 
         private static final long serialVersionUID = 1L;
+    }
+
+
+    private static Severity getHighestAllowedSeverity(String highestAllowedVulnSeverity) {
+        if(Objects.isNull(highestAllowedVulnSeverity)) {
+            return Severity.MEDIUM;
+        }
+        else {
+            return Severity.fromValue(highestAllowedVulnSeverity.toUpperCase());
+        }
     }
 
 
